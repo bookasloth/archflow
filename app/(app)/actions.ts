@@ -63,6 +63,8 @@ export async function createTicket(formData: FormData) {
     title,
     priority: (String(formData.get('priority')) || 'medium') as never,
     due_date: opt('due_date'),
+    drawing_id: opt('drawing_id'),
+    drawing_revision_id: opt('drawing_revision_id'),
     reporter_id: user!.id,
   })
   revalidatePath(`/projects/${formData.get('project_id')}`)

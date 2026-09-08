@@ -1,10 +1,12 @@
 'use client'
 import { createTicket } from '@/app/(app)/actions'
+import { DrawingRevisionSelect, type RevisionOption } from '@/components/DrawingRevisionSelect'
 
 const DISCIPLINE = ['architectural', 'structural', 'electrical', 'plumbing', 'fire_safety',
   'interior', 'landscape', 'construction', 'documentation', 'client_coordination']
 
-export function NewTicketForm({ projectId }: { projectId: string }) {
+export function NewTicketForm({ projectId, revisionOptions = [] }:
+  { projectId: string; revisionOptions?: RevisionOption[] }) {
   return (
     <form action={createTicket} className="flex flex-wrap items-center gap-2 text-sm">
       <input type="hidden" name="project_id" value={projectId} />
@@ -24,6 +26,7 @@ export function NewTicketForm({ projectId }: { projectId: string }) {
         ))}
       </select>
       <input name="due_date" type="date" className="rounded border p-1" />
+      {revisionOptions.length > 0 && <DrawingRevisionSelect options={revisionOptions} />}
       <button className="rounded bg-black px-3 text-white">Add</button>
     </form>
   )
