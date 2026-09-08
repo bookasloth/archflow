@@ -20,20 +20,23 @@ export function HierarchySidebar({ projectId, buildings }: { projectId: string; 
               <form action={addRoom} className="ml-3 flex gap-1">
                 <input type="hidden" name="project_id" value={projectId} />
                 <input type="hidden" name="floor_id" value={f.id} />
-                <input name="name" placeholder="+ room" className="w-full rounded border px-1" />
+                <input name="name" placeholder="+ room" className="w-full rounded border px-1" required />
+                <button type="submit" className="rounded border px-2 text-xs">+</button>
               </form>
             </div>
           ))}
           <form action={addFloor} className="ml-3 flex gap-1">
             <input type="hidden" name="project_id" value={projectId} />
             <input type="hidden" name="building_id" value={b.id} />
-            <input name="name" placeholder="+ floor" className="w-full rounded border px-1" />
+            <input name="name" placeholder="+ floor" className="w-full rounded border px-1" required />
+            <button type="submit" className="rounded border px-2 text-xs">+</button>
           </form>
         </div>
       ))}
       <form action={addBuilding} className="flex gap-1">
         <input type="hidden" name="project_id" value={projectId} />
-        <input name="name" placeholder="+ building" className="w-full rounded border px-1" />
+        <input name="name" placeholder="+ building" className="w-full rounded border px-1" required />
+        <button type="submit" className="rounded border px-2 text-xs">+</button>
       </form>
     </aside>
   )
