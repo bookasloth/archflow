@@ -1757,3 +1757,17 @@ git commit -m "feat(pwa): manifest and installable app"
 **Type consistency:** `TicketStatus`/`TicketType` defined in `lib/status.ts` (Task 3), imported by `lib/health.ts` (Task 4), `StatusControl`/`changeStatus` (Task 10). `Marker = { x; y; label }` defined in `PhotoMarker` (Task 9), consumed identically in `BeforeAfter`, `SiteCapture`, `AddPhoto`. `saveAttachment`/`signedUrl`/`createSiteIssue` signatures match across producer (Tasks 9/11) and consumers. Health `computeHealth(tickets, today)` signature matches dashboard call (Task 7). ✓
 
 **Note (accepted, single-firm scale):** `changeStatus` re-reads the ticket and re-checks `canTransition` server-side (source of truth); the client may display a `→ verified` button that no-ops without an after-photo — acceptable, flagged in Task 10 Step 2.
+
+---
+
+## Execution deviations (2026-09-08, discovered while building)
+
+These differ from the task bodies above; the committed code is the source of truth.
+
+1. **Supabase key = publishable, not anon.** The project uses the new key format, so the env var is `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (value `sb_publishable_…`), not `NEXT_PUBLIC_SUPABASE_ANON_KEY`. All three `lib/supabase/*.ts` and `.env.example` use the publishable name. `SUPABASE_SERVICE_ROLE_KEY` was dropped — signed URLs are generated with the cookie-bound server client, no service role needed.
+2. **`@supabase/ssr` must match supabase-js.** ssr 0.5.2 is incompatible with supabase-js 2.48+ (a new `SchemaNameOrClientOptions` generic shifts `SupabaseClient`'s params, so typed tables resolve to `never`). Pinned `@supabase/ssr@^0.12.7` (peer `^2.114.0`) against supabase-js 2.116.
+3. **`database.types.ts` empties.** Empty `Views`/`Functions`/`CompositeTypes` must be `{ [_ in never]: never }`, NOT `Record<string, never>` — the latter's string index signature of `never` poisons supabase-js's `Tables & Views` intersection, making every table `never`.
+4. **`vitest.config.ts` needs the `@` alias** (`resolve.alias`) so tests resolve `@/lib/*` like the app does. (Omitted from the Task 1 config block.)
+5. **Nested-embed casts.** Because the hand-written types have empty `Relationships`, embedded selects (`issue_markers(...)`, `floors(...rooms...)`, `profiles(full_name)`) type as `SelectQueryError`; results are cast through `unknown` (or `never`). Runtime is unaffected. Regenerating with `supabase gen types` later restores full embed typing and lets the casts go.
+6. **No `create-next-app`.** Scaffolded config files by hand — the dir already held `docs/` + `.git`, which trips the generator's non-empty-dir guard.
+7. **PWA icon is SVG** (`public/icon.svg`, referenced `sizes: "any"`) instead of two PNGs — text-authorable, no binary step.
