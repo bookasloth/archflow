@@ -8,33 +8,47 @@ export function UploadRevision({ drawingId, projectId }: { drawingId: string; pr
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
   const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function submit() {
     if (!file) return
     setBusy(true)
-    const ext = file.name.split('.').pop() || 'pdf'
-    const path = `${projectId}/${drawingId}/${crypto.randomUUID()}.${ext}`
-    await createClient().storage.from('drawing-files').upload(path, file)
-    await createRevision({ drawingId, projectId, storagePath: path })
-    setFile(null)
-    setBusy(false)
-    router.refresh()
+    setError(null)
+    try {
+      const ext = file.name.split('.').pop() || 'pdf'
+      const path = `${projectId}/${drawingId}/${crypto.randomUUID()}.${ext}`
+      const { error: upErr } = await createClient().storage.from('drawing-files').upload(path, file)
+      if (upErr) {
+        setError(upErr.message)
+        return
+      }
+      await createRevision({ drawingId, projectId, storagePath: path })
+      setFile(null)
+      router.refresh()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Upload failed')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <input
-        type="file"
-        accept=".pdf,image/*,.dwg,.dxf,.rvt"
-        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-      />
-      <button
-        disabled={!file || busy}
-        onClick={submit}
-        className="rounded bg-black px-3 py-1 text-sm text-white disabled:opacity-50"
-      >
-        {busy ? 'Uploading…' : 'Upload revision'}
-      </button>
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <input
+          type="file"
+          accept=".pdf,image/*,.dwg,.dxf,.rvt"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+        />
+        <button
+          disabled={!file || busy}
+          onClick={submit}
+          className="rounded bg-black px-3 py-1 text-sm text-white disabled:opacity-50"
+        >
+          {busy ? 'Uploading…' : 'Upload revision'}
+        </button>
+      </div>
+      {error && <p className="text-sm text-red-600">{error}</p>}
     </div>
   )
 }
