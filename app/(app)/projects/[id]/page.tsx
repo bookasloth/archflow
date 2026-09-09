@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { HierarchySidebar } from '@/components/HierarchySidebar'
 import { TicketList } from '@/components/TicketList'
 import { TicketFilters } from '@/components/TicketFilters'
+import { ViewSwitcher } from '@/components/ViewSwitcher'
+import { KanbanBoard } from '@/components/KanbanBoard'
 import { NewTicketForm } from '@/components/NewTicketForm'
 import { formatRevision } from '@/lib/revision-status'
 import type { RevisionOption } from '@/components/DrawingRevisionSelect'
@@ -12,10 +14,11 @@ export default async function ProjectPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ status?: string; discipline?: string }>
+  searchParams: Promise<{ status?: string; discipline?: string; view?: string; ktype?: string }>
 }) {
   const { id } = await params
   const sp = await searchParams
+  const view = sp.view === 'kanban' ? 'kanban' : 'table'
   const supabase = await createClient()
 
   const { data: project } = await supabase.from('projects').select('name, code').eq('id', id).single()
@@ -26,10 +29,10 @@ export default async function ProjectPage({
 
   let q = supabase
     .from('tickets')
-    .select('id, seq, type, discipline, title, status, priority, due_date')
+    .select('id, seq, type, discipline, title, status, priority, due_date, assignee:assignee_id(full_name)')
     .eq('project_id', id)
     .order('seq', { ascending: false })
-  if (sp.status) q = q.eq('status', sp.status as never)
+  if (sp.status && view === 'table') q = q.eq('status', sp.status as never)
   if (sp.discipline) q = q.eq('discipline', sp.discipline as never)
   const { data: tickets } = await q
 
@@ -53,8 +56,15 @@ export default async function ProjectPage({
           <Link href={`/projects/${id}/drawings`} className="text-sm text-gray-500">Drawings →</Link>
         </div>
         <NewTicketForm projectId={id} revisionOptions={revisionOptions} />
-        <TicketFilters />
-        <TicketList tickets={(tickets as never) ?? []} />
+        <div className="flex items-center justify-between">
+          <TicketFilters />
+          <ViewSwitcher />
+        </div>
+        {view === 'kanban' ? (
+          <KanbanBoard tickets={(tickets as never) ?? []} />
+        ) : (
+          <TicketList tickets={(tickets as never) ?? []} />
+        )}
       </div>
     </main>
   )
