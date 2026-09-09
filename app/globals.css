@@ -38,6 +38,9 @@
   --approval-draft-soft: #F1F1EF;         --approval-draft-fg: #57534E;
   --approval-under_review-soft: #FBF0DD;  --approval-under_review-fg: #B45309;
   --approval-approved-soft: #E6F4EA;      --approval-approved-fg: #15803D;
+  --approval-approved_with_comments-soft: #E6F4EA; --approval-approved_with_comments-fg: #15803D;
+  --approval-changes_requested-soft: #FBF0DD;     --approval-changes_requested-fg: #B45309;
+  --approval-rejected-soft: #FBE7E7;              --approval-rejected-fg: #B91C1C;
   --approval-superseded-soft: #F1F1EF;    --approval-superseded-fg: #9A9A96;
 
   /* health (mirrors lib/health.ts) */

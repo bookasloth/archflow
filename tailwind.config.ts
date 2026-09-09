@@ -34,6 +34,9 @@ export default {
           'draft': { soft: 'var(--approval-draft-soft)', fg: 'var(--approval-draft-fg)' },
           'under_review': { soft: 'var(--approval-under_review-soft)', fg: 'var(--approval-under_review-fg)' },
           'approved': { soft: 'var(--approval-approved-soft)', fg: 'var(--approval-approved-fg)' },
+          'approved_with_comments': { soft: 'var(--approval-approved_with_comments-soft)', fg: 'var(--approval-approved_with_comments-fg)' },
+          'changes_requested': { soft: 'var(--approval-changes_requested-soft)', fg: 'var(--approval-changes_requested-fg)' },
+          'rejected': { soft: 'var(--approval-rejected-soft)', fg: 'var(--approval-rejected-fg)' },
           'superseded': { soft: 'var(--approval-superseded-soft)', fg: 'var(--approval-superseded-fg)' },
         },
         health: {
