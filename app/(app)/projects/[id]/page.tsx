@@ -1,87 +1,112 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { HierarchySidebar } from '@/components/HierarchySidebar'
-import { TicketList } from '@/components/TicketList'
-import { TicketFilters } from '@/components/TicketFilters'
-import { ViewSwitcher } from '@/components/ViewSwitcher'
-import { KanbanBoard } from '@/components/KanbanBoard'
-import { TicketDrawer } from '@/components/TicketDrawer'
-import { NewTicketForm } from '@/components/NewTicketForm'
-import { formatRevision } from '@/lib/revision-status'
-import type { RevisionOption } from '@/components/DrawingRevisionSelect'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { Section } from '@/components/ui/Section'
+import { HealthDot } from '@/components/HealthDot'
+import { computeHealth, type HealthTicket } from '@/lib/health'
 
-export default async function ProjectPage({
+export default async function ProjectOverviewPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{
-    status?: string; discipline?: string; view?: string; ktype?: string; ticket?: string
-    q?: string; priority?: string; assignee?: string; building?: string; floor?: string; room?: string
-  }>
 }) {
   const { id } = await params
-  const sp = await searchParams
-  const view = sp.view === 'kanban' ? 'kanban' : 'table'
   const supabase = await createClient()
 
   const { data: project } = await supabase.from('projects').select('name, code').eq('id', id).single()
-  const { data: buildings } = await supabase
-    .from('buildings')
-    .select('id, name, floors(id, name, rooms(id, name))')
-    .eq('project_id', id)
-  const { data: profiles } = await supabase.from('profiles').select('id, full_name').order('full_name')
-
-  let q = supabase
+  const { data: tickets } = await supabase
     .from('tickets')
-    .select('id, seq, type, discipline, title, status, priority, due_date, assignee:assignee_id(full_name), building:building_id(name), floor:floor_id(name), room:room_id(name)')
+    .select('type, status, priority, due_date')
     .eq('project_id', id)
-    .order('seq', { ascending: false })
-  if (sp.status && view === 'table') q = q.eq('status', sp.status as never)
-  if (sp.discipline) q = q.eq('discipline', sp.discipline as never)
-  if (sp.priority) q = q.eq('priority', sp.priority as never)
-  if (sp.assignee) q = q.eq('assignee_id', sp.assignee)
-  if (sp.building) q = q.eq('building_id', sp.building)
-  if (sp.floor) q = q.eq('floor_id', sp.floor)
-  if (sp.room) q = q.eq('room_id', sp.room)
-  if (sp.q) q = q.ilike('title', `%${sp.q}%`)
-  const { data: tickets } = await q
+  const { data: pendingRevs } = await supabase
+    .from('drawing_revisions')
+    .select('id, drawings!inner(project_id)')
+    .eq('status', 'under_review')
+    .eq('drawings.project_id', id)
+  const { data: proposedMats } = await supabase
+    .from('materials')
+    .select('id')
+    .eq('project_id', id)
+    .eq('status', 'proposed')
 
-  const { data: drawingRows } = await supabase
-    .from('drawings')
-    .select('id, title, drawing_revisions(id, revision_no)')
-    .eq('project_id', id)
-  type DR = { id: string; title: string; drawing_revisions: { id: string; revision_no: number }[] }
-  const revisionOptions: RevisionOption[] = ((drawingRows as unknown as DR[]) ?? []).flatMap((d) =>
-    (d.drawing_revisions ?? []).map((r) => ({
-      revisionId: r.id, drawingId: d.id, label: `${d.title} ${formatRevision(r.revision_no)}`,
-    })),
+  const today = new Date()
+  const iso = today.toISOString().slice(0, 10)
+  const list = (tickets as HealthTicket[]) ?? []
+  const openish = (s: string) => s === 'open' || s === 'in_progress'
+  const isOverdue = (t: HealthTicket) =>
+    !!t.due_date && t.due_date < iso && !['closed', 'verified'].includes(t.status)
+
+  const work = {
+    open: list.filter((t) => t.type === 'task' && openish(t.status)).length,
+    overdue: list.filter((t) => t.type === 'task' && isOverdue(t)).length,
+    critical: list.filter((t) => t.type === 'task' && t.priority === 'critical' && openish(t.status)).length,
+  }
+  const site = {
+    open: list.filter((t) => t.type === 'site_issue' && openish(t.status)).length,
+    awaitingVerification: list.filter((t) => t.type === 'site_issue' && t.status === 'resolved').length,
+  }
+  const drawingsPending = (pendingRevs as { id: string }[] | null)?.length ?? 0
+  const materialsPending = (proposedMats as { id: string }[] | null)?.length ?? 0
+  const health = computeHealth(list, today)
+
+  const stat = (n: number, label: string) => (
+    <div className="flex items-baseline gap-1.5">
+      <span className="font-heading text-lg font-semibold text-ink">{n}</span>
+      <span className="text-xs text-ink-muted">{label}</span>
+    </div>
   )
 
   return (
-    <main className="flex gap-6">
-      <HierarchySidebar projectId={id} buildings={(buildings as never) ?? []} />
-      <div className="flex-1 space-y-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold">{project?.name}</h1>
-          <Link href={`/projects/${id}/drawings`} className="text-sm text-gray-500">Drawings →</Link>
-          <Link href={`/projects/${id}/materials`} className="text-sm text-gray-500">Materials →</Link>
-        </div>
-        <NewTicketForm projectId={id} revisionOptions={revisionOptions} />
-        <div className="flex items-center justify-between">
-          <TicketFilters
-            assignees={(profiles as { id: string; full_name: string | null }[]) ?? []}
-            buildings={(buildings as never) ?? []}
-          />
-          <ViewSwitcher />
-        </div>
-        {view === 'kanban' ? (
-          <KanbanBoard tickets={(tickets as never) ?? []} />
-        ) : (
-          <TicketList tickets={(tickets as never) ?? []} />
-        )}
-        <TicketDrawer />
+    <div className="max-w-4xl">
+      <PageHeader
+        title={project?.name ?? 'Project'}
+        meta={
+          <>
+            {project?.code && <span className="font-mono text-ink-faint">{project.code}</span>}
+            <span className="inline-flex items-center gap-1.5">
+              <HealthDot health={health} />
+              <span className="capitalize">{health === 'red' ? 'At risk' : health === 'yellow' ? 'Needs attention' : 'On track'}</span>
+            </span>
+          </>
+        }
+        actions={
+          <Link
+            href={`/projects/${id}/work`}
+            className="inline-flex h-9 items-center rounded bg-primary px-3.5 text-sm font-medium text-primary-fg hover:bg-primary-hover"
+          >
+            Open work
+          </Link>
+        }
+      />
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Section title="Work" actions={<Link href={`/projects/${id}/work`} className="text-xs text-ink-muted hover:text-ink">View →</Link>}>
+          <div className="flex flex-wrap gap-5 rounded-lg border border-subtle bg-surface p-4">
+            {stat(work.open, 'open')}
+            {stat(work.overdue, 'overdue')}
+            {stat(work.critical, 'critical')}
+          </div>
+        </Section>
+
+        <Section title="Drawings" actions={<Link href={`/projects/${id}/drawings`} className="text-xs text-ink-muted hover:text-ink">View →</Link>}>
+          <div className="flex flex-wrap gap-5 rounded-lg border border-subtle bg-surface p-4">
+            {stat(drawingsPending, 'awaiting approval')}
+          </div>
+        </Section>
+
+        <Section title="Site issues" actions={<Link href={`/projects/${id}/work?ktype=site_issue&view=kanban`} className="text-xs text-ink-muted hover:text-ink">View →</Link>}>
+          <div className="flex flex-wrap gap-5 rounded-lg border border-subtle bg-surface p-4">
+            {stat(site.open, 'open')}
+            {stat(site.awaitingVerification, 'awaiting verification')}
+          </div>
+        </Section>
+
+        <Section title="Materials" actions={<Link href={`/projects/${id}/materials`} className="text-xs text-ink-muted hover:text-ink">View →</Link>}>
+          <div className="flex flex-wrap gap-5 rounded-lg border border-subtle bg-surface p-4">
+            {stat(materialsPending, 'pending decisions')}
+          </div>
+        </Section>
       </div>
-    </main>
+    </div>
   )
 }
