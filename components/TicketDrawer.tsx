@@ -69,29 +69,39 @@ export function TicketDrawer() {
         role="dialog"
         aria-modal="true"
         aria-label="Ticket detail"
-        className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto bg-white p-5 shadow-xl"
+        className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto bg-surface p-5 shadow-xl"
       >
         <button
           ref={closeBtnRef}
           onClick={close}
-          className="mb-3 text-sm text-gray-500 hover:text-gray-900"
+          className="mb-3 text-sm text-ink-muted hover:text-ink"
         >
           ✕ Close
         </button>
-        {loading && <p className="text-sm text-gray-500">Loading…</p>}
-        {!loading && !detail && <p className="text-sm text-gray-500">Not found.</p>}
+        {loading && <p className="text-sm text-ink-muted">Loading…</p>}
+        {!loading && !detail && <p className="text-sm text-ink-muted">Not found.</p>}
         {detail && (
           <div className="space-y-5">
             <div>
-              <div className="font-mono text-xs text-gray-500">
+              <div className="font-mono text-xs text-ink-muted">
                 {(detail.type === 'site_issue' ? 'SITE-' : 'TASK-') + detail.seq}
               </div>
               <h2 className="text-lg font-semibold">{detail.title}</h2>
-              <div className="mt-1 flex gap-3 text-xs text-gray-500">
+              <div className="mt-1 flex gap-3 text-xs text-ink-muted">
                 <span>{detail.discipline}</span>
                 <span>{detail.priority}</span>
                 {detail.due_date && <span>due {detail.due_date}</span>}
               </div>
+              {detail.drawing_id && (
+                <a
+                  href={`/drawings/${detail.drawing_id}`}
+                  className="mt-1 inline-block text-xs text-primary hover:underline"
+                >
+                  {(detail as unknown as { drawing?: { drawing_number: string | null; title: string } | null }).drawing?.drawing_number
+                    ? `${(detail as unknown as { drawing?: { drawing_number: string | null } | null }).drawing!.drawing_number} — linked drawing`
+                    : 'Linked drawing'} →
+                </a>
+              )}
             </div>
             {detail.description && <p className="text-sm">{detail.description}</p>}
             <StatusControl

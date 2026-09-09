@@ -124,7 +124,7 @@ export async function getTicketDetail(id: string) {
   const supabase = await createClient()
   const { data: t } = await supabase
     .from('tickets')
-    .select('id, seq, type, discipline, title, description, status, priority, due_date, project_id, drawing_id')
+    .select('id, seq, type, discipline, title, description, status, priority, due_date, project_id, drawing_id, drawing:drawing_id(drawing_number, title)')
     .eq('id', id)
     .single()
   if (!t) return null
