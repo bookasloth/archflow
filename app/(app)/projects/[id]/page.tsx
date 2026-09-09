@@ -15,7 +15,10 @@ export default async function ProjectPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ status?: string; discipline?: string; view?: string; ktype?: string }>
+  searchParams: Promise<{
+    status?: string; discipline?: string; view?: string; ktype?: string; ticket?: string
+    q?: string; priority?: string; assignee?: string; building?: string; floor?: string; room?: string
+  }>
 }) {
   const { id } = await params
   const sp = await searchParams
@@ -27,6 +30,7 @@ export default async function ProjectPage({
     .from('buildings')
     .select('id, name, floors(id, name, rooms(id, name))')
     .eq('project_id', id)
+  const { data: profiles } = await supabase.from('profiles').select('id, full_name').order('full_name')
 
   let q = supabase
     .from('tickets')
@@ -35,6 +39,12 @@ export default async function ProjectPage({
     .order('seq', { ascending: false })
   if (sp.status && view === 'table') q = q.eq('status', sp.status as never)
   if (sp.discipline) q = q.eq('discipline', sp.discipline as never)
+  if (sp.priority) q = q.eq('priority', sp.priority as never)
+  if (sp.assignee) q = q.eq('assignee_id', sp.assignee)
+  if (sp.building) q = q.eq('building_id', sp.building)
+  if (sp.floor) q = q.eq('floor_id', sp.floor)
+  if (sp.room) q = q.eq('room_id', sp.room)
+  if (sp.q) q = q.ilike('title', `%${sp.q}%`)
   const { data: tickets } = await q
 
   const { data: drawingRows } = await supabase
@@ -59,7 +69,10 @@ export default async function ProjectPage({
         </div>
         <NewTicketForm projectId={id} revisionOptions={revisionOptions} />
         <div className="flex items-center justify-between">
-          <TicketFilters />
+          <TicketFilters
+            assignees={(profiles as { id: string; full_name: string | null }[]) ?? []}
+            buildings={(buildings as never) ?? []}
+          />
           <ViewSwitcher />
         </div>
         {view === 'kanban' ? (

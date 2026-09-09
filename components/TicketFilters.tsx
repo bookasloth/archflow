@@ -81,7 +81,7 @@ export function TicketFilters({
       <div className="flex flex-wrap items-end gap-2">
         <Input
           placeholder="Search tickets…"
-          defaultValue={get('q')}
+          value={get('q')}
           onChange={(e) => set('q', e.target.value)}
           className="w-48"
           aria-label="Search tickets"
