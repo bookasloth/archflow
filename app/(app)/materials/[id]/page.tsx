@@ -12,6 +12,8 @@ type MaterialRow = {
   product_code: string | null; finish: string | null; color: string | null; size: string | null
   cost: number | null; supplier: string | null; notes: string | null; status: MaterialStatus
   rooms: { name: string } | null
+  decided_at: string | null
+  decider: { full_name: string | null } | null
 }
 type AttRow = { id: string; storage_path: string; kind: string }
 
@@ -21,7 +23,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ id: s
 
   const { data: m } = await supabase
     .from('materials')
-    .select('id, project_id, category, name, manufacturer, product_code, finish, color, size, cost, supplier, notes, status, rooms(name)')
+    .select('id, project_id, category, name, manufacturer, product_code, finish, color, size, cost, supplier, notes, status, rooms(name), decided_at, decided_by, decider:profiles!decided_by(full_name)')
     .eq('id', id)
     .single()
   if (!m) notFound()
@@ -54,6 +56,12 @@ export default async function MaterialPage({ params }: { params: Promise<{ id: s
       </div>
 
       <MaterialStatusControl id={mat.id} status={mat.status} />
+
+      {mat.status !== 'proposed' && mat.decided_at && (
+        <p className="text-xs text-gray-500">
+          {mat.status} by {mat.decider?.full_name ?? 'someone'} on {mat.decided_at.slice(0, 10)}
+        </p>
+      )}
 
       <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
         {fields.filter(([, v]) => v !== null && v !== '').map(([k, v]) => (
