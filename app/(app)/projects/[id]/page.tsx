@@ -30,7 +30,7 @@ export default async function ProjectPage({
 
   let q = supabase
     .from('tickets')
-    .select('id, seq, type, discipline, title, status, priority, due_date, assignee:assignee_id(full_name)')
+    .select('id, seq, type, discipline, title, status, priority, due_date, assignee:assignee_id(full_name), building:building_id(name), floor:floor_id(name), room:room_id(name)')
     .eq('project_id', id)
     .order('seq', { ascending: false })
   if (sp.status && view === 'table') q = q.eq('status', sp.status as never)

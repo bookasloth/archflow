@@ -6,6 +6,7 @@ import type { TicketStatus } from '@/lib/status'
 import type { Priority } from '@/lib/health'
 import type { Discipline } from '@/lib/labels'
 
+type Named = { name: string } | null
 type Row = {
   id: string
   seq: number
@@ -15,6 +16,15 @@ type Row = {
   status: string
   priority: string
   due_date: string | null
+  assignee: { full_name: string | null } | null
+  building: Named
+  floor: Named
+  room: Named
+}
+
+function locationOf(t: Row): string {
+  const parts = [t.building?.name, t.floor?.name, t.room?.name].filter(Boolean)
+  return parts.length ? parts.join(' · ') : '—'
 }
 
 export function TicketList({ tickets }: { tickets: Row[] }) {
@@ -32,25 +42,43 @@ export function TicketList({ tickets }: { tickets: Row[] }) {
     return <EmptyState title="No tickets yet" description="Work items you create for this project will appear here." />
 
   return (
-    <ul className="divide-y divide-subtle rounded-lg border border-subtle bg-surface">
-      {tickets.map((t) => (
-        <li key={t.id} className="flex items-center justify-between gap-3 p-2.5 text-sm hover:bg-surface-hover">
-          <button
-            onClick={() => open(t.id)}
-            className="flex min-w-0 items-center gap-2 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)] rounded"
-          >
-            <span className="font-mono text-xs text-ink-faint">
-              {(t.type === 'site_issue' ? 'SITE-' : 'TASK-') + t.seq}
-            </span>
-            <span className="truncate text-ink">{t.title}</span>
-          </button>
-          <span className="flex shrink-0 items-center gap-2">
-            <DisciplineBadge discipline={t.discipline as Discipline} />
-            <PriorityBadge priority={t.priority as Priority} />
-            <StatusBadge status={t.status as TicketStatus} />
-          </span>
-        </li>
-      ))}
-    </ul>
+    <div className="overflow-x-auto rounded-lg border border-subtle bg-surface">
+      <table className="w-full min-w-[720px] text-sm">
+        <thead>
+          <tr className="border-b border-subtle text-left text-xs font-medium text-ink-faint">
+            <th className="px-3 py-2 font-medium">Ticket</th>
+            <th className="px-3 py-2 font-medium">Status</th>
+            <th className="px-3 py-2 font-medium">Priority</th>
+            <th className="px-3 py-2 font-medium">Discipline</th>
+            <th className="px-3 py-2 font-medium">Assignee</th>
+            <th className="px-3 py-2 font-medium">Location</th>
+            <th className="px-3 py-2 font-medium">Due</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-subtle">
+          {tickets.map((t) => (
+            <tr key={t.id} className="hover:bg-surface-hover">
+              <td className="px-3 py-2">
+                <button
+                  onClick={() => open(t.id)}
+                  className="flex min-w-0 items-center gap-2 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)] rounded"
+                >
+                  <span className="font-mono text-xs text-ink-faint">
+                    {(t.type === 'site_issue' ? 'SITE-' : 'TASK-') + t.seq}
+                  </span>
+                  <span className="truncate text-ink">{t.title}</span>
+                </button>
+              </td>
+              <td className="px-3 py-2"><StatusBadge status={t.status as TicketStatus} /></td>
+              <td className="px-3 py-2"><PriorityBadge priority={t.priority as Priority} /></td>
+              <td className="px-3 py-2"><DisciplineBadge discipline={t.discipline as Discipline} /></td>
+              <td className="px-3 py-2 text-ink-muted">{t.assignee?.full_name ?? '—'}</td>
+              <td className="px-3 py-2 text-ink-muted">{locationOf(t)}</td>
+              <td className="px-3 py-2 text-ink-muted">{t.due_date ?? '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
