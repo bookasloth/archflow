@@ -94,6 +94,8 @@ Delivered as CSS variables in `globals.css` + mapped into `tailwind.config.ts` `
 - `--text` (`#1A1A19`), `--text-muted` (`#6B6B68`), `--text-faint` (`#9A9A96`)
 - `--focus` ring (`#3B82F6` at low emphasis)
 
+**Brand primary — ORANGE (approved):** `--primary` warm orange for primary actions (solid-fill primary buttons; tinted background on ghost-button hover). Default `--primary #E8590C`, `--primary-hover #D24E08`, `--primary-active #B84406`, `--primary-fg #FFFFFF`, plus `--primary-soft` (low-alpha orange) for ghost hover. Kept deeper/more saturated than the soft amber status/priority tints so ACTION never reads as STATUS. Value tweakable after render.
+
 **Meaningful accents (used ONLY for the mapped meaning, never as decoration):**
 - **Status** (from `lib/status.ts`): open=slate, in_progress=blue, resolved=amber, verified=violet, closed=green. *(Extends existing `lib/ticket-colors.ts` — reuse it.)*
 - **Priority**: low=slate, medium=neutral, high=amber, critical=red.
@@ -103,9 +105,9 @@ Delivered as CSS variables in `globals.css` + mapped into `tailwind.config.ts` `
 
 Each accent exposed as a token pair `--<name>-fg` / `--<name>-bg-soft` so a Badge is a soft tint + readable text, never a loud block.
 
-**Type scale (typography carries hierarchy):**
-- Font: system stack now (`ui-sans-serif, …`); optionally wire Inter later (no dep — Google Fonts via next/font is allowed, decide at approval).
-- `--text-2xl` page title, `--text-lg` section, `--text-sm` body/meta default, `--text-xs` labels. Weights limited to 400 / 500 / 600 (principle: avoid excessive weights).
+**Type scale (typography carries hierarchy) — fonts approved:**
+- **Plus Jakarta Sans** for headings (`h1`, `h2` — page + major section titles); **Poppins** for everything else (body, labels, metadata). Both self-hosted via `next/font/google` (no runtime dependency), exposed as `--font-heading` / `--font-body` and mapped in Tailwind (`font-heading`, `font-body`; `font-sans` defaults to body).
+- `--text-2xl` page title (Jakarta), `--text-lg` section (Jakarta), `--text-sm` body/meta default (Poppins), `--text-xs` labels (Poppins). Weights limited to 400 / 500 / 600.
 
 **Spacing / radius / shadow:** an 8px-based spacing rhythm, `--radius` (6px) and `--radius-lg` (10px), one restrained shadow token (`--shadow-sm`). Avoid heavy cards/big shadows (principle 3).
 
@@ -114,10 +116,11 @@ Each accent exposed as a token pair `--<name>-fg` / `--<name>-bg-soft` so a Badg
 ### 4b. App shell
 Rebuild `app/(app)/layout.tsx` into a two-column workspace:
 - **Collapsible left sidebar** (state remembered via `localStorage`, per principle 4). Sections:
-  - **Workspace:** Overview, Projects, My Work *(My Work links exist even before Slice 7 builds the page — or deferred; decide at approval)*
+  - **Workspace:** Overview, Projects, My Work
   - **Current Project** (shown when a project is active, from the route): Overview, Work, Drawings, Site, Materials
   - **Project Structure:** Buildings / Floors / Rooms entry (reuses `HierarchySidebar` content)
-  - **Management:** Reports, Activity *(links may be stubbed until their slices land)*
+  - **Management:** Reports, Activity
+  - **Stubbed links approved:** links to not-yet-built pages (My Work, Reports, Activity) render now and route to a shared lightweight "Coming soon" placeholder (`app/(app)/_ComingSoon` or a per-route `page.tsx` stub) until their slices land. No dead links.
 - **Active-location highlighting** so "Where am I?" is always answered (principle 30).
 - **Top bar** slimmed: breadcrumb (Project → …), global search placeholder (wired in P1/P4), sign out.
 - Content area uses the new tokens (bg/surface/spacing).
@@ -131,8 +134,10 @@ Ticket/drawing/material/site logic, state machines, RLS, existing page bodies (t
 
 ---
 
-## 5. Open decisions for approval
-1. **Design tokens** (§4a): approve the neutral palette + accent approach, or adjust specific values/hues.
-2. **Font**: keep system stack, or wire Inter via `next/font` (no runtime dep).
-3. **Sidebar nav items** (§4b): include stubbed links for not-yet-built pages (My Work, Reports, Activity) now, or only show links whose pages exist.
-4. **Execution flow**: same subagent-driven slice-by-slice flow used for Kanban (implementer → task review → fixes → final review), one slice at a time with your approval between slices.
+## 5. Decisions — RESOLVED (approved 2026-09-09)
+1. **Design tokens** (§4a): approved. Neutral ground + meaning-only accents, **plus orange brand primary** on buttons (values tweakable after render).
+2. **Fonts**: **Plus Jakarta Sans** (h1/h2) + **Poppins** (body/rest) via `next/font/google`.
+3. **Sidebar nav**: **show stubbed links now** → shared "Coming soon" placeholder for unbuilt pages.
+4. **Execution**: subagent-driven, **one slice at a time** with approval between slices.
+
+→ Proceeding to write the Slice 1 implementation plan and execute it.
