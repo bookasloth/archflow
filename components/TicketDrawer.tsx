@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { getTicketDetail } from '@/app/(app)/actions'
 import { StatusControl } from '@/components/StatusControl'
@@ -18,6 +18,8 @@ export function TicketDrawer() {
   const id = params.get('ticket')
   const [detail, setDetail] = useState<Detail>(null)
   const [loading, setLoading] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
+  const closeBtnRef = useRef<HTMLButtonElement>(null)
 
   function close() {
     const p = new URLSearchParams(params.toString())
@@ -41,7 +43,7 @@ export function TicketDrawer() {
     return () => {
       alive = false
     }
-  }, [id])
+  }, [id, reloadKey])
 
   useEffect(() => {
     if (!id) return
@@ -49,6 +51,10 @@ export function TicketDrawer() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
+
+  useEffect(() => {
+    if (id) closeBtnRef.current?.focus()
   }, [id])
 
   if (!id) return null
@@ -61,10 +67,15 @@ export function TicketDrawer() {
       <div className="absolute inset-0 bg-black/30" onClick={close} aria-hidden />
       <aside
         role="dialog"
+        aria-modal="true"
         aria-label="Ticket detail"
         className="absolute right-0 top-0 h-full w-full max-w-md overflow-y-auto bg-white p-5 shadow-xl"
       >
-        <button onClick={close} className="mb-3 text-sm text-gray-500 hover:text-gray-900">
+        <button
+          ref={closeBtnRef}
+          onClick={close}
+          className="mb-3 text-sm text-gray-500 hover:text-gray-900"
+        >
           ✕ Close
         </button>
         {loading && <p className="text-sm text-gray-500">Loading…</p>}
@@ -87,6 +98,7 @@ export function TicketDrawer() {
               id={detail.id}
               type={detail.type as TicketType}
               status={detail.status as TicketStatus}
+              onChanged={() => setReloadKey((k) => k + 1)}
             />
             {detail.type === 'site_issue' ? (
               <div className="space-y-3">
