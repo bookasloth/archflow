@@ -23,6 +23,11 @@ type AttachmentKind = 'before' | 'after' | 'reference'
 type RevisionStatus =
   | 'draft' | 'under_review' | 'approved' | 'approved_with_comments'
   | 'changes_requested' | 'rejected' | 'superseded'
+type MaterialStatus = 'proposed' | 'approved' | 'rejected'
+type MaterialCategory =
+  | 'flooring' | 'wall_finish' | 'ceiling' | 'joinery' | 'sanitary' | 'lighting'
+  | 'hardware' | 'paint' | 'glazing' | 'landscape' | 'other'
+type MaterialAttachmentKind = 'photo' | 'datasheet'
 
 export interface Database {
   public: {
@@ -156,6 +161,48 @@ export interface Database {
         }
         Relationships: []
       }
+      materials: {
+        Row: {
+          id: string; project_id: string; room_id: string | null; category: MaterialCategory
+          name: string; manufacturer: string | null; product_code: string | null
+          finish: string | null; color: string | null; size: string | null
+          cost: number | null; supplier: string | null; notes: string | null
+          status: MaterialStatus; decided_at: string | null; decided_by: string | null
+          created_by: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; project_id: string; room_id?: string | null; category: MaterialCategory
+          name: string; manufacturer?: string | null; product_code?: string | null
+          finish?: string | null; color?: string | null; size?: string | null
+          cost?: number | null; supplier?: string | null; notes?: string | null
+          status?: MaterialStatus; decided_at?: string | null; decided_by?: string | null
+          created_by?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; project_id?: string; room_id?: string | null; category?: MaterialCategory
+          name?: string; manufacturer?: string | null; product_code?: string | null
+          finish?: string | null; color?: string | null; size?: string | null
+          cost?: number | null; supplier?: string | null; notes?: string | null
+          status?: MaterialStatus; decided_at?: string | null; decided_by?: string | null
+          created_by?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
+      material_attachments: {
+        Row: {
+          id: string; material_id: string; storage_path: string
+          kind: MaterialAttachmentKind; uploaded_by: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; material_id: string; storage_path: string
+          kind?: MaterialAttachmentKind; uploaded_by?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; material_id?: string; storage_path?: string
+          kind?: MaterialAttachmentKind; uploaded_by?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: { [_ in never]: never }
     Functions: { [_ in never]: never }
@@ -168,6 +215,9 @@ export interface Database {
       priority: Priority
       attachment_kind: AttachmentKind
       revision_status: RevisionStatus
+      material_status: MaterialStatus
+      material_category: MaterialCategory
+      material_attachment_kind: MaterialAttachmentKind
     }
     CompositeTypes: { [_ in never]: never }
   }
