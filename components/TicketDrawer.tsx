@@ -61,6 +61,8 @@ export function TicketDrawer() {
 
   const before = detail?.photos.filter((p) => p.kind === 'before') ?? []
   const after = detail?.photos.filter((p) => p.kind === 'after') ?? []
+  const isSite = detail?.type === 'site_issue'
+  const needsAfterToVerify = isSite && detail?.status === 'resolved' && after.length === 0
 
   return (
     <div className="fixed inset-0 z-40">
@@ -103,27 +105,32 @@ export function TicketDrawer() {
                 </a>
               )}
             </div>
-            {detail.description && <p className="text-sm">{detail.description}</p>}
+            {isSite && (
+              <div className="space-y-3">
+                <BeforeAfter
+                  before={before.map((p) => ({ url: p.url, markers: p.markers as Marker[] }))}
+                  after={after.map((p) => ({ url: p.url, markers: p.markers as Marker[] }))}
+                />
+                {needsAfterToVerify && (
+                  <p className="rounded border border-subtle bg-surface-hover px-2.5 py-1.5 text-xs text-ink-muted">
+                    Add an after-photo to verify this issue.
+                  </p>
+                )}
+                <AddPhoto ticketId={detail.id} projectId={detail.project_id} kind="after" />
+              </div>
+            )}
             <StatusControl
               id={detail.id}
               type={detail.type as TicketType}
               status={detail.status as TicketStatus}
               onChanged={() => setReloadKey((k) => k + 1)}
             />
-            {detail.type === 'site_issue' ? (
-              <div className="space-y-3">
-                <BeforeAfter
-                  before={before.map((p) => ({ url: p.url, markers: p.markers as Marker[] }))}
-                  after={after.map((p) => ({ url: p.url, markers: p.markers as Marker[] }))}
-                />
-                <AddPhoto ticketId={detail.id} projectId={detail.project_id} kind="after" />
-              </div>
-            ) : (
+            {detail.description && <p className="text-sm">{detail.description}</p>}
+            {!isSite &&
               detail.photos.map((p, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img key={i} src={p.url} alt="" className="max-w-full rounded" />
-              ))
-            )}
+              ))}
             <CommentThread ticketId={detail.id} comments={detail.comments} />
           </div>
         )}
