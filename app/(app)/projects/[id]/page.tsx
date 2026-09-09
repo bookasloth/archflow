@@ -54,6 +54,7 @@ export default async function ProjectPage({
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-semibold">{project?.name}</h1>
           <Link href={`/projects/${id}/drawings`} className="text-sm text-gray-500">Drawings →</Link>
+          <Link href={`/projects/${id}/materials`} className="text-sm text-gray-500">Materials →</Link>
         </div>
         <NewTicketForm projectId={id} revisionOptions={revisionOptions} />
         <div className="flex items-center justify-between">
