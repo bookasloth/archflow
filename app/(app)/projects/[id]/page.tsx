@@ -5,6 +5,7 @@ import { TicketList } from '@/components/TicketList'
 import { TicketFilters } from '@/components/TicketFilters'
 import { ViewSwitcher } from '@/components/ViewSwitcher'
 import { KanbanBoard } from '@/components/KanbanBoard'
+import { TicketDrawer } from '@/components/TicketDrawer'
 import { NewTicketForm } from '@/components/NewTicketForm'
 import { formatRevision } from '@/lib/revision-status'
 import type { RevisionOption } from '@/components/DrawingRevisionSelect'
@@ -66,6 +67,7 @@ export default async function ProjectPage({
         ) : (
           <TicketList tickets={(tickets as never) ?? []} />
         )}
+        <TicketDrawer />
       </div>
     </main>
   )
