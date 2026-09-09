@@ -12,7 +12,8 @@ export const managementNav: NavLink[] = [
 
 export function projectNav(projectId: string): NavLink[] {
   return [
-    { label: 'Work', href: `/projects/${projectId}` },
+    { label: 'Overview', href: `/projects/${projectId}` },
+    { label: 'Work', href: `/projects/${projectId}/work` },
     { label: 'Drawings', href: `/projects/${projectId}/drawings` },
     { label: 'Site', href: `/site` },
     { label: 'Materials', href: `/projects/${projectId}/materials` },
