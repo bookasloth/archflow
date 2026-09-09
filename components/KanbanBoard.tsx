@@ -6,6 +6,7 @@ import { columnsFor } from '@/lib/kanban-columns'
 import { STATUS_COLOR } from '@/lib/ticket-colors'
 import { TicketCard, type CardTicket } from '@/components/TicketCard'
 import { changeStatus } from '@/app/(app)/actions'
+import { TicketDrawer } from '@/components/TicketDrawer'
 
 const TYPES: { key: TicketType; label: string }[] = [
   { key: 'task', label: 'Task' },
@@ -119,6 +120,7 @@ export function KanbanBoard({ tickets }: { tickets: CardTicket[] }) {
           )
         })}
       </div>
+      <TicketDrawer />
     </div>
   )
 }
