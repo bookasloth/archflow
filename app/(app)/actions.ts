@@ -68,7 +68,7 @@ export async function createTicket(formData: FormData) {
     drawing_revision_id: opt('drawing_revision_id'),
     reporter_id: user!.id,
   })
-  revalidatePath(`/projects/${formData.get('project_id')}`)
+  revalidatePath(`/projects/${formData.get('project_id')}`, 'layout')
 }
 
 export async function changeStatus(
@@ -102,7 +102,7 @@ export async function changeStatus(
   }
   await supabase.from('tickets').update({ status: to }).eq('id', id)
   revalidatePath(`/tickets/${id}`)
-  revalidatePath(`/projects/${t.project_id}`)
+  revalidatePath(`/projects/${t.project_id}`, 'layout')
   return { ok: true }
 }
 
