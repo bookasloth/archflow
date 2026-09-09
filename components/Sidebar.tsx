@@ -37,8 +37,11 @@ export function Sidebar() {
     return () => { alive = false }
   }, [projectId])
 
-  const isActive = (href: string) =>
-    href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(href + '/')
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/'
+    if (/^\/projects\/[^/]+$/.test(href)) return pathname === href
+    return pathname === href || pathname.startsWith(href + '/')
+  }
 
   return (
     <aside
@@ -53,7 +56,7 @@ export function Sidebar() {
         </IconButton>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-2 pb-4">
+      <nav aria-label="Primary" className="flex-1 overflow-y-auto px-2 pb-4">
         <Section label="Workspace" collapsed={collapsed}>
           {workspaceNav.map((n) => (
             <SidebarNavItem key={n.href} href={n.href} label={n.label} active={isActive(n.href)} collapsed={collapsed} />

@@ -19,7 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <button className="text-sm text-ink-muted hover:text-ink">Sign out</button>
           </form>
         </header>
-        <main className="min-w-0 flex-1 p-6">{children}</main>
+        <div className="min-w-0 flex-1 p-6">{children}</div>
       </div>
     </div>
   )
