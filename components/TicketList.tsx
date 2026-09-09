@@ -1,4 +1,9 @@
 import Link from 'next/link'
+import { StatusBadge, PriorityBadge, DisciplineBadge } from '@/components/ui/Badge'
+import { EmptyState } from '@/components/ui/EmptyState'
+import type { TicketStatus } from '@/lib/status'
+import type { Priority } from '@/lib/health'
+import type { Discipline } from '@/lib/labels'
 
 type Row = {
   id: string
@@ -12,21 +17,22 @@ type Row = {
 }
 
 export function TicketList({ tickets }: { tickets: Row[] }) {
-  if (tickets.length === 0) return <p className="text-sm text-gray-500">No tickets yet.</p>
+  if (tickets.length === 0)
+    return <EmptyState title="No tickets yet" description="Work items you create for this project will appear here." />
   return (
-    <ul className="divide-y rounded border">
+    <ul className="divide-y divide-subtle rounded-lg border border-subtle bg-surface">
       {tickets.map((t) => (
-        <li key={t.id} className="flex items-center justify-between p-2 text-sm">
-          <Link href={`/tickets/${t.id}`} className="flex items-center gap-2">
-            <span className="font-mono text-xs text-gray-500">
+        <li key={t.id} className="flex items-center justify-between gap-3 p-2.5 text-sm hover:bg-surface-hover">
+          <Link href={`/tickets/${t.id}`} className="flex min-w-0 items-center gap-2">
+            <span className="font-mono text-xs text-ink-faint">
               {(t.type === 'site_issue' ? 'SITE-' : 'TASK-') + t.seq}
             </span>
-            <span>{t.title}</span>
+            <span className="truncate text-ink">{t.title}</span>
           </Link>
-          <span className="flex gap-2 text-xs text-gray-500">
-            <span>{t.discipline}</span>
-            <span>{t.priority}</span>
-            <span>{t.status}</span>
+          <span className="flex shrink-0 items-center gap-2">
+            <DisciplineBadge discipline={t.discipline as Discipline} />
+            <PriorityBadge priority={t.priority as Priority} />
+            <StatusBadge status={t.status as TicketStatus} />
           </span>
         </li>
       ))}

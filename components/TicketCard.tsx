@@ -1,5 +1,8 @@
 'use client'
 import type { TicketStatus } from '@/lib/status'
+import { PriorityBadge, DisciplineBadge } from '@/components/ui/Badge'
+import type { Priority } from '@/lib/health'
+import type { Discipline } from '@/lib/labels'
 
 export type CardTicket = {
   id: string
@@ -48,11 +51,11 @@ export function TicketCard({
         <span className="font-mono text-xs text-gray-500">
           {(ticket.type === 'site_issue' ? 'SITE-' : 'TASK-') + ticket.seq}
         </span>
-        <span className="text-xs text-gray-500">{ticket.priority}</span>
+        <PriorityBadge priority={ticket.priority as Priority} />
       </div>
       <div className="font-medium">{ticket.title}</div>
       <div className="flex items-center justify-between text-xs text-gray-500">
-        <span>{ticket.discipline}</span>
+        <DisciplineBadge discipline={ticket.discipline as Discipline} />
         {ticket.due_date && <span>due {ticket.due_date}</span>}
       </div>
       {ticket.assignee?.full_name && (

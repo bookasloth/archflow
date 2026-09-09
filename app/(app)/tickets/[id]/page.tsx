@@ -6,7 +6,11 @@ import { StatusControl } from '@/components/StatusControl'
 import { BeforeAfter } from '@/components/BeforeAfter'
 import { CommentThread } from '@/components/CommentThread'
 import { AddPhoto } from '@/components/AddPhoto'
+import { PageHeader } from '@/components/ui/PageHeader'
+import { StatusBadge, PriorityBadge, DisciplineBadge } from '@/components/ui/Badge'
 import type { TicketType, TicketStatus } from '@/lib/status'
+import type { Priority } from '@/lib/health'
+import type { Discipline } from '@/lib/labels'
 import type { Marker } from '@/components/PhotoMarker'
 
 type AttachmentRow = {
@@ -50,20 +54,24 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
 
   return (
     <main className="max-w-3xl space-y-5">
-      <div>
-        <div className="font-mono text-xs text-gray-500">
-          {(t.type === 'site_issue' ? 'SITE-' : 'TASK-') + t.seq}
-        </div>
-        <h1 className="text-xl font-semibold">{t.title}</h1>
-        <div className="mt-1 flex gap-3 text-xs text-gray-500">
-          <span>{t.discipline}</span>
-          <span>{t.priority}</span>
-          {t.due_date && <span>due {t.due_date}</span>}
-        </div>
+      <PageHeader
+        title={t.title}
+        meta={
+          <>
+            <span className="font-mono text-ink-faint">
+              {(t.type === 'site_issue' ? 'SITE-' : 'TASK-') + t.seq}
+            </span>
+            <DisciplineBadge discipline={t.discipline as Discipline} />
+            <PriorityBadge priority={t.priority as Priority} />
+            <StatusBadge status={t.status as TicketStatus} />
+            {t.due_date && <span>due {t.due_date}</span>}
+          </>
+        }
+      >
         {t.drawing_id && (
           <Link href={`/drawings/${t.drawing_id}`} className="text-xs text-blue-600">linked drawing →</Link>
         )}
-      </div>
+      </PageHeader>
       {t.description && <p className="text-sm">{t.description}</p>}
       <StatusControl id={t.id} type={t.type as TicketType} status={t.status as TicketStatus} />
       {t.type === 'site_issue' ? (
