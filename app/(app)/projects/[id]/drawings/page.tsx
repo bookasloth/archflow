@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NewDrawingForm } from '@/components/NewDrawingForm'
 import { DrawingList } from '@/components/DrawingList'
 import { DrawingFilters } from '@/components/DrawingFilters'
+import { PageHeader } from '@/components/ui/PageHeader'
 
 type DrawingRow = {
   id: string; drawing_number: string | null; title: string; discipline: string | null
@@ -35,10 +36,7 @@ export default async function DrawingsPage({ params, searchParams }: { params: P
 
   return (
     <main className="space-y-4">
-      <div className="flex items-center gap-3">
-        <h1 className="text-xl font-semibold">{project?.name} — Drawings</h1>
-        <Link href={`/projects/${id}`} className="text-sm text-gray-500">← project</Link>
-      </div>
+      <PageHeader title={`${project?.name ?? 'Project'} — Drawings`} />
       <NewDrawingForm projectId={id} />
       <DrawingFilters />
       <DrawingList drawings={filtered} />
