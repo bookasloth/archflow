@@ -1,23 +1,26 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { Sidebar } from '@/components/Sidebar'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   return (
-    <div className="min-h-screen">
-      <header className="flex items-center justify-between border-b px-4 py-3">
-        <nav className="flex gap-4 text-sm">
-          <Link href="/" className="font-semibold">Archflow</Link>
-          <Link href="/site">Site Visit</Link>
-        </nav>
-        <form action="/auth/signout" method="post">
-          <button className="text-sm text-gray-500">Sign out</button>
-        </form>
-      </header>
-      <div className="p-4">{children}</div>
+    <div className="flex min-h-screen bg-bg">
+      <Sidebar />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center justify-between border-b border-subtle bg-surface px-5 py-2.5">
+          <div className="text-sm text-ink-faint">
+            {/* Breadcrumb + global search land in later slices */}
+            <span className="text-ink-muted">Search coming soon</span>
+          </div>
+          <form action="/auth/signout" method="post">
+            <button className="text-sm text-ink-muted hover:text-ink">Sign out</button>
+          </form>
+        </header>
+        <main className="min-w-0 flex-1 p-6">{children}</main>
+      </div>
     </div>
   )
 }

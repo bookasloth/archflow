@@ -1,0 +1,26 @@
+export type NavLink = { label: string; href: string }
+
+export const workspaceNav: NavLink[] = [
+  { label: 'Overview', href: '/' },
+  { label: 'My Work', href: '/my-work' },
+]
+
+export const managementNav: NavLink[] = [
+  { label: 'Reports', href: '/reports' },
+  { label: 'Activity', href: '/activity' },
+]
+
+export function projectNav(projectId: string): NavLink[] {
+  return [
+    { label: 'Work', href: `/projects/${projectId}` },
+    { label: 'Drawings', href: `/projects/${projectId}/drawings` },
+    { label: 'Site', href: `/site` },
+    { label: 'Materials', href: `/projects/${projectId}/materials` },
+  ]
+}
+
+// Extract the active project id from a pathname like /projects/<id>/...
+export function projectIdFromPath(pathname: string): string | null {
+  const m = pathname.match(/^\/projects\/([^/]+)/)
+  return m ? m[1] : null
+}
