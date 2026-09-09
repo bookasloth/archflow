@@ -20,6 +20,14 @@ export default async function Dashboard() {
     const pid = r.drawings?.project_id
     if (pid) pendingByProject.set(pid, (pendingByProject.get(pid) ?? 0) + 1)
   }
+  const { data: proposedMats } = await supabase
+    .from('materials')
+    .select('id, project_id')
+    .eq('status', 'proposed')
+  const materialsByProject = new Map<string, number>()
+  for (const mm of (proposedMats as { project_id: string }[] | null) ?? []) {
+    materialsByProject.set(mm.project_id, (materialsByProject.get(mm.project_id) ?? 0) + 1)
+  }
 
   const today = new Date()
   const byProject = new Map<string, HealthTicket[]>()
@@ -51,6 +59,7 @@ export default async function Dashboard() {
             const list = byProject.get(p.id) ?? []
             const c = counts(list)
             const pending = pendingByProject.get(p.id) ?? 0
+            const matPending = materialsByProject.get(p.id) ?? 0
             return (
               <li key={p.id} className="flex items-center justify-between p-3">
                 <Link href={`/projects/${p.id}`} className="flex items-center gap-2">
@@ -61,6 +70,7 @@ export default async function Dashboard() {
                 <span className="text-xs text-gray-500">
                   due today {c.dueToday} · overdue {c.overdue} · open site {c.openSite}
                   {` · pending approvals ${pending}`}
+                  {` · materials pending ${matPending}`}
                 </span>
               </li>
             )
