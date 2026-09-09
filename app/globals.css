@@ -1,3 +1,68 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* neutral ground */
+  --bg: #FBFBFA;
+  --surface: #FFFFFF;
+  --surface-hover: #F5F5F4;
+  --border-subtle: #EAEAE8;
+  --border-line: #DDDDDA;
+  --ink: #1A1A19;
+  --ink-muted: #6B6B68;
+  --ink-faint: #9A9A96;
+  --focus: #3B82F6;
+
+  /* brand primary — orange (buttons only) */
+  --primary: #E8590C;
+  --primary-hover: #D24E08;
+  --primary-active: #B84406;
+  --primary-fg: #FFFFFF;
+  --primary-soft: rgba(232, 89, 12, 0.10);
+
+  /* status (mirrors lib/status.ts / ticket-colors.ts) — soft bg + readable fg */
+  --status-open-soft: #EEF1F4;         --status-open-fg: #475569;
+  --status-in_progress-soft: #E7EEFB;  --status-in_progress-fg: #1D4ED8;
+  --status-resolved-soft: #FBF0DD;     --status-resolved-fg: #B45309;
+  --status-verified-soft: #F1EBFB;     --status-verified-fg: #6D28D9;
+  --status-closed-soft: #E6F4EA;       --status-closed-fg: #15803D;
+
+  /* priority */
+  --priority-low-soft: #EEF1F4;        --priority-low-fg: #475569;
+  --priority-medium-soft: #F1F1EF;     --priority-medium-fg: #57534E;
+  --priority-high-soft: #FBF0DD;       --priority-high-fg: #B45309;
+  --priority-critical-soft: #FBE7E7;   --priority-critical-fg: #B91C1C;
+
+  /* approval / revision (mirrors lib/revision-status.ts) */
+  --approval-draft-soft: #F1F1EF;         --approval-draft-fg: #57534E;
+  --approval-under_review-soft: #FBF0DD;  --approval-under_review-fg: #B45309;
+  --approval-approved-soft: #E6F4EA;      --approval-approved-fg: #15803D;
+  --approval-superseded-soft: #F1F1EF;    --approval-superseded-fg: #9A9A96;
+
+  /* health (mirrors lib/health.ts) */
+  --health-green: #15803D;
+  --health-yellow: #B45309;
+  --health-red: #B91C1C;
+
+  --radius: 6px;
+  --radius-lg: 10px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+
+  /* discipline (muted, distinct — for small dot/label, not full backgrounds) */
+  --discipline-architectural: #6366F1;
+  --discipline-structural: #0EA5E9;
+  --discipline-electrical: #F59E0B;
+  --discipline-plumbing: #14B8A6;
+  --discipline-fire_safety: #EF4444;
+  --discipline-interior: #EC4899;
+  --discipline-landscape: #22C55E;
+  --discipline-construction: #A16207;
+  --discipline-documentation: #64748B;
+  --discipline-client_coordination: #8B5CF6;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
