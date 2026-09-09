@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { addBuilding, addFloor, addRoom } from '@/app/(app)/actions'
 
 type Room = { id: string; name: string }
@@ -15,7 +16,13 @@ export function HierarchySidebar({ projectId, buildings }: { projectId: string; 
             <div key={f.id} className="ml-3">
               <div>{f.name}</div>
               {f.rooms.map((r) => (
-                <div key={r.id} className="ml-3 text-gray-600">{r.name}</div>
+                <Link
+                  key={r.id}
+                  href={`/projects/${projectId}/rooms/${r.id}`}
+                  className="ml-3 block text-gray-600 hover:text-black"
+                >
+                  {r.name}
+                </Link>
               ))}
               <form action={addRoom} className="ml-3 flex gap-1">
                 <input type="hidden" name="project_id" value={projectId} />
