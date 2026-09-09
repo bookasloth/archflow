@@ -20,6 +20,9 @@ type Discipline =
 type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'verified' | 'closed'
 type Priority = 'low' | 'medium' | 'high' | 'critical'
 type AttachmentKind = 'before' | 'after' | 'reference'
+type RevisionStatus =
+  | 'draft' | 'under_review' | 'approved' | 'approved_with_comments'
+  | 'changes_requested' | 'rejected' | 'superseded'
 
 export interface Database {
   public: {
@@ -70,6 +73,7 @@ export interface Database {
           type: TicketType; discipline: Discipline; title: string; description: string | null
           status: TicketStatus; priority: Priority
           assignee_id: string | null; reporter_id: string; due_date: string | null; created_at: string
+          drawing_id: string | null; drawing_revision_id: string | null
         }
         Insert: {
           id?: string; project_id: string
@@ -77,6 +81,7 @@ export interface Database {
           type: TicketType; discipline: Discipline; title: string; description?: string | null
           status?: TicketStatus; priority?: Priority
           assignee_id?: string | null; reporter_id: string; due_date?: string | null; created_at?: string
+          drawing_id?: string | null; drawing_revision_id?: string | null
         }
         Update: {
           id?: string; project_id?: string
@@ -84,6 +89,7 @@ export interface Database {
           type?: TicketType; discipline?: Discipline; title?: string; description?: string | null
           status?: TicketStatus; priority?: Priority
           assignee_id?: string | null; reporter_id?: string; due_date?: string | null; created_at?: string
+          drawing_id?: string | null; drawing_revision_id?: string | null
         }
         Relationships: []
       }
@@ -114,6 +120,42 @@ export interface Database {
         Update: { id?: string; ticket_id?: string; author_id?: string; body?: string; created_at?: string }
         Relationships: []
       }
+      drawings: {
+        Row: {
+          id: string; project_id: string; building_id: string | null; floor_id: string | null
+          discipline: Discipline | null; title: string; drawing_number: string | null
+          created_by: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; project_id: string; building_id?: string | null; floor_id?: string | null
+          discipline?: Discipline | null; title: string; drawing_number?: string | null
+          created_by?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; project_id?: string; building_id?: string | null; floor_id?: string | null
+          discipline?: Discipline | null; title?: string; drawing_number?: string | null
+          created_by?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
+      drawing_revisions: {
+        Row: {
+          id: string; drawing_id: string; revision_no: number; storage_path: string
+          status: RevisionStatus; reviewer_id: string | null; notes: string | null
+          uploaded_by: string | null; decided_at: string | null; created_at: string
+        }
+        Insert: {
+          id?: string; drawing_id: string; revision_no: number; storage_path: string
+          status?: RevisionStatus; reviewer_id?: string | null; notes?: string | null
+          uploaded_by?: string | null; decided_at?: string | null; created_at?: string
+        }
+        Update: {
+          id?: string; drawing_id?: string; revision_no?: number; storage_path?: string
+          status?: RevisionStatus; reviewer_id?: string | null; notes?: string | null
+          uploaded_by?: string | null; decided_at?: string | null; created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: { [_ in never]: never }
     Functions: { [_ in never]: never }
@@ -125,6 +167,7 @@ export interface Database {
       ticket_status: TicketStatus
       priority: Priority
       attachment_kind: AttachmentKind
+      revision_status: RevisionStatus
     }
     CompositeTypes: { [_ in never]: never }
   }

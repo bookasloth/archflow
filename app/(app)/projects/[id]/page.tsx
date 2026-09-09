@@ -1,8 +1,11 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { HierarchySidebar } from '@/components/HierarchySidebar'
 import { TicketList } from '@/components/TicketList'
 import { TicketFilters } from '@/components/TicketFilters'
 import { NewTicketForm } from '@/components/NewTicketForm'
+import { formatRevision } from '@/lib/revision-status'
+import type { RevisionOption } from '@/components/DrawingRevisionSelect'
 
 export default async function ProjectPage({
   params,
@@ -30,12 +33,26 @@ export default async function ProjectPage({
   if (sp.discipline) q = q.eq('discipline', sp.discipline as never)
   const { data: tickets } = await q
 
+  const { data: drawingRows } = await supabase
+    .from('drawings')
+    .select('id, title, drawing_revisions(id, revision_no)')
+    .eq('project_id', id)
+  type DR = { id: string; title: string; drawing_revisions: { id: string; revision_no: number }[] }
+  const revisionOptions: RevisionOption[] = ((drawingRows as unknown as DR[]) ?? []).flatMap((d) =>
+    (d.drawing_revisions ?? []).map((r) => ({
+      revisionId: r.id, drawingId: d.id, label: `${d.title} ${formatRevision(r.revision_no)}`,
+    })),
+  )
+
   return (
     <main className="flex gap-6">
       <HierarchySidebar projectId={id} buildings={(buildings as never) ?? []} />
       <div className="flex-1 space-y-4">
-        <h1 className="text-xl font-semibold">{project?.name}</h1>
-        <NewTicketForm projectId={id} />
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-semibold">{project?.name}</h1>
+          <Link href={`/projects/${id}/drawings`} className="text-sm text-gray-500">Drawings →</Link>
+        </div>
+        <NewTicketForm projectId={id} revisionOptions={revisionOptions} />
         <TicketFilters />
         <TicketList tickets={(tickets as never) ?? []} />
       </div>

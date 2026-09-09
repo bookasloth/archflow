@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { signedUrl } from '@/app/(app)/media-actions'
 import { StatusControl } from '@/components/StatusControl'
@@ -21,7 +22,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
 
   const { data: t } = await supabase
     .from('tickets')
-    .select('id, seq, type, discipline, title, description, status, priority, due_date, project_id')
+    .select('id, seq, type, discipline, title, description, status, priority, due_date, project_id, drawing_id')
     .eq('id', id)
     .single()
   if (!t) notFound()
@@ -59,6 +60,9 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
           <span>{t.priority}</span>
           {t.due_date && <span>due {t.due_date}</span>}
         </div>
+        {t.drawing_id && (
+          <Link href={`/drawings/${t.drawing_id}`} className="text-xs text-blue-600">linked drawing →</Link>
+        )}
       </div>
       {t.description && <p className="text-sm">{t.description}</p>}
       <StatusControl id={t.id} type={t.type as TicketType} status={t.status as TicketStatus} />
