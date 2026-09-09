@@ -9,6 +9,7 @@ export function TicketFilters() {
   const router = useRouter()
   const pathname = usePathname()
   const params = useSearchParams()
+  const isKanban = params.get('view') === 'kanban'
 
   function set(key: string, value: string) {
     const p = new URLSearchParams(params.toString())
@@ -19,15 +20,17 @@ export function TicketFilters() {
 
   return (
     <div className="flex gap-2 text-sm">
-      <select
-        className="rounded border p-1"
-        defaultValue={params.get('status') ?? ''}
-        onChange={(e) => set('status', e.target.value)}
-      >
-        {STATUS.map((s) => (
-          <option key={s} value={s}>{s || 'any status'}</option>
-        ))}
-      </select>
+      {!isKanban && (
+        <select
+          className="rounded border p-1"
+          defaultValue={params.get('status') ?? ''}
+          onChange={(e) => set('status', e.target.value)}
+        >
+          {STATUS.map((s) => (
+            <option key={s} value={s}>{s || 'any status'}</option>
+          ))}
+        </select>
+      )}
       <select
         className="rounded border p-1"
         defaultValue={params.get('discipline') ?? ''}
