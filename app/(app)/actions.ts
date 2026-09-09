@@ -106,6 +106,10 @@ export async function changeStatus(
   return { ok: true }
 }
 
+export async function changeStatusForm(formData: FormData): Promise<void> {
+  await changeStatus(formData)
+}
+
 export async function addComment(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
