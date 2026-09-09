@@ -25,13 +25,13 @@ export function PhotoMarker({
   }
 
   return (
-    <div ref={ref} onClick={handleClick} className="relative inline-block select-none">
+    <div ref={ref} onClick={handleClick} className={`relative inline-block select-none ${editable ? 'cursor-crosshair' : ''}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt="" className="max-w-full rounded" />
       {value.map((m, i) => (
         <span
           key={i}
-          className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-red-600 px-2 text-xs text-white shadow"
+          className="absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white bg-red-600 text-[10px] font-semibold leading-none text-white shadow"
           style={{ left: `${m.x * 100}%`, top: `${m.y * 100}%` }}
           title={m.label ?? ''}
         >
