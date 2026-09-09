@@ -1,5 +1,6 @@
 import { reviewRevision } from '@/app/(app)/drawing-actions'
 import { allowedRevisionTransitions, formatRevision, type RevisionStatus } from '@/lib/revision-status'
+import { RevisionBadge } from '@/components/ui/Badge'
 
 const LABEL: Record<string, string> = {
   under_review: 'Submit for review',
@@ -22,7 +23,7 @@ export function RevisionHistory({ revisions }: { revisions: Rev[] }) {
         <li key={r.id} className="flex items-center justify-between p-2 text-sm">
           <span className="flex items-center gap-3">
             <span className="font-mono">{formatRevision(r.revision_no)}</span>
-            <span className="rounded bg-gray-100 px-2 py-0.5 text-xs">{r.status}</span>
+            <RevisionBadge status={r.status} />
             <span className="text-xs text-gray-500">{r.uploader ?? 'someone'}</span>
           </span>
           <span className="flex gap-1">
