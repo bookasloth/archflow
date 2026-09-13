@@ -67,17 +67,17 @@ begin
     (v_proj,v_bldg,null,null,'task','structural','RCC framework — columns & beams','Cast columns/beams to 2nd floor.','closed','high',v_admin,v_admin,'2026-02-16','2026-03-20','2026-02-16'),
     (v_proj,v_bldg,v_gf,null,'task','construction','Brickwork & blockwork','External + internal walls.','closed','medium',v_admin,v_admin,'2026-03-10','2026-04-05','2026-03-10'),
     (v_proj,v_bldg,null,null,'task','electrical','Electrical conduiting','Concealed conduit + boxes.','closed','medium',v_admin,v_admin,'2026-04-01','2026-04-25','2026-04-01'),
-    (v_proj,v_bldg,v_toilet,null,'task','plumbing','Plumbing rough-in','Supply + drainage lines.','closed','medium',v_admin,v_admin,'2026-04-03','2026-04-28','2026-04-03'),
+    (v_proj,v_bldg,v_gf,v_toilet,'task','plumbing','Plumbing rough-in','Supply + drainage lines.','closed','medium',v_admin,v_admin,'2026-04-03','2026-04-28','2026-04-03'),
     (v_proj,v_bldg,null,null,'task','construction','Internal plastering','All floors.','closed','medium',v_admin,v_admin,'2026-04-20','2026-05-10','2026-04-20'),
-    (v_proj,v_bldg,v_lobby,v_lobby,'task','interior','Flooring — marble laying','Lobby + hall Italian marble.','closed','high',v_admin,v_admin,'2026-05-05','2026-05-25','2026-05-05'),
+    (v_proj,v_bldg,v_gf,v_lobby,'task','interior','Flooring — marble laying','Lobby + hall Italian marble.','closed','high',v_admin,v_admin,'2026-05-05','2026-05-25','2026-05-05'),
     (v_proj,v_bldg,null,null,'task','interior','Painting — final coat','Emulsion, two coats.','closed','medium',v_admin,v_admin,'2026-06-01','2026-06-15','2026-06-01'),
-    (v_proj,v_bldg,v_office,v_office,'task','interior','Furniture installation','Admin office + conference.','closed','low',v_admin,v_admin,'2026-06-10','2026-06-22','2026-06-10'),
+    (v_proj,v_bldg,v_ff,v_office,'task','interior','Furniture installation','Admin office + conference.','closed','low',v_admin,v_admin,'2026-06-10','2026-06-22','2026-06-10'),
     (v_proj,v_bldg,null,null,'task','documentation','Handover & documentation','As-builts, O&M manuals, keys.','closed','high',v_admin,v_admin,'2026-06-20','2026-06-30','2026-06-20'),
     (v_proj,v_bldg,v_gf,v_toilet,'site_issue','plumbing','Water seepage in basement wall','Seepage at NW corner after rain.','verified','high',v_admin,v_admin,'2026-02-18','2026-02-25','2026-02-18'),
     (v_proj,v_bldg,null,null,'site_issue','structural','Column misalignment at grid C3','Column off-axis ~40mm.','verified','critical',v_admin,v_admin,'2026-03-12','2026-03-18','2026-03-12'),
     (v_proj,v_bldg,v_ff,null,'site_issue','structural','Hairline cracks in first-floor slab','Cracks noticed during curing.','verified','high',v_admin,v_admin,'2026-04-08','2026-04-16','2026-04-08'),
-    (v_proj,v_bldg,v_office,v_office,'site_issue','electrical','Socket short-circuit in admin office','Tripped on first power-on.','verified','high',v_admin,v_admin,'2026-05-12','2026-05-16','2026-05-12'),
-    (v_proj,v_bldg,v_lobby,v_lobby,'site_issue','interior','Uneven marble joints in lobby','Lippage at entrance band.','verified','medium',v_admin,v_admin,'2026-06-05','2026-06-12','2026-06-05'),
+    (v_proj,v_bldg,v_ff,v_office,'site_issue','electrical','Socket short-circuit in admin office','Tripped on first power-on.','verified','high',v_admin,v_admin,'2026-05-12','2026-05-16','2026-05-12'),
+    (v_proj,v_bldg,v_gf,v_lobby,'site_issue','interior','Uneven marble joints in lobby','Lippage at entrance band.','verified','medium',v_admin,v_admin,'2026-06-05','2026-06-12','2026-06-05'),
     (v_proj,v_bldg,null,null,'site_issue','interior','Paint peeling near window','Damp patch by SE window.','closed','low',v_admin,v_admin,'2026-06-18','2026-06-24','2026-06-18');
 
   -- ---- Materials ----------------------------------------------------------
