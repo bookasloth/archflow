@@ -17,7 +17,7 @@ export function ViewSwitcher() {
   }
 
   return (
-    <div className="inline-flex rounded border text-sm" role="tablist" aria-label="View">
+    <div className="inline-flex rounded border border-subtle text-sm" role="tablist" aria-label="View">
       {VIEWS.map((v) => (
         <button
           key={v}
@@ -25,7 +25,7 @@ export function ViewSwitcher() {
           aria-selected={active === v}
           onClick={() => set(v)}
           className={`px-3 py-1 capitalize first:rounded-l last:rounded-r ${
-            active === v ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100'
+            active === v ? 'bg-primary-soft text-primary font-medium' : 'text-ink-muted hover:bg-surface-hover'
           }`}
         >
           {v}

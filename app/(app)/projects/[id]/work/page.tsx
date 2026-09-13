@@ -4,6 +4,7 @@ import { HierarchySidebar } from '@/components/HierarchySidebar'
 import { TicketList } from '@/components/TicketList'
 import { TicketFilters } from '@/components/TicketFilters'
 import { ViewSwitcher } from '@/components/ViewSwitcher'
+import { ViewControls } from '@/components/ViewControls'
 import { KanbanBoard } from '@/components/KanbanBoard'
 import { TicketDrawer } from '@/components/TicketDrawer'
 import { NewTicketForm } from '@/components/NewTicketForm'
@@ -81,7 +82,10 @@ export default async function ProjectWorkPage({
             assignees={(profiles as { id: string; full_name: string | null }[]) ?? []}
             buildings={(buildings as never) ?? []}
           />
-          <ViewSwitcher />
+          <div className="flex items-center gap-1">
+            {view === 'table' && <ViewControls />}
+            <ViewSwitcher />
+          </div>
         </div>
         {view === 'kanban' ? (
           <KanbanBoard tickets={(tickets as never) ?? []} />
