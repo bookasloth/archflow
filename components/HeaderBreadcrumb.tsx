@@ -35,7 +35,7 @@ export function HeaderBreadcrumb({ projects }: { projects: ProjectRef[] }) {
     if (parts[2]) items.push({ label: PROJECT_SUB[parts[2]] ?? parts[2] })
   } else {
     items.push({ label: TOP[parts[0]] ?? parts[0] })
-    if (parts[0] === 'admin' && parts[1] === 'users') items.push({ label: 'Users' })
+    if (parts[0] === 'admin' && parts[1]) items.push({ label: parts[1] === 'users' ? 'Users' : parts[1] === 'guide' ? 'Guide' : parts[1] })
   }
 
   // Last crumb is the current page — drop its href.
