@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { signedDrawingUrl } from '@/app/(app)/drawing-actions'
 import { formatRevision, type RevisionStatus } from '@/lib/revision-status'
+import { categoryLabel } from '@/lib/materials'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Section } from '@/components/ui/Section'
 import { RevisionBadge, DisciplineBadge } from '@/components/ui/Badge'
@@ -44,6 +45,14 @@ export default async function DrawingPage({ params }: { params: Promise<{ id: st
     .order('seq', { ascending: false })
   type LT = { id: string; seq: number; type: string; title: string }
   const linkedTickets = (linked as LT[]) ?? []
+
+  const { data: linkedMat } = await supabase
+    .from('materials')
+    .select('id, name, category')
+    .eq('drawing_id', id)
+    .order('created_at', { ascending: false })
+  type LM = { id: string; name: string; category: string }
+  const linkedMaterials = (linkedMat as LM[]) ?? []
 
   return (
     <div className="max-w-3xl space-y-5">
@@ -93,6 +102,23 @@ export default async function DrawingPage({ params }: { params: Promise<{ id: st
                     {(t.type === 'site_issue' ? 'SITE-' : 'TASK-') + t.seq}
                   </span>
                   <span className="truncate text-ink">{t.title}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Section>
+
+      <Section title={`Linked materials · ${linkedMaterials.length}`}>
+        {linkedMaterials.length === 0 ? (
+          <p className="text-sm text-ink-faint">None.</p>
+        ) : (
+          <ul className="divide-y divide-subtle rounded-lg border border-subtle bg-surface text-sm">
+            {linkedMaterials.map((m) => (
+              <li key={m.id} className="hover:bg-surface-hover">
+                <Link href={`/materials/${m.id}`} className="flex items-center justify-between p-2.5">
+                  <span className="truncate text-ink">{m.name}</span>
+                  <span className="text-xs text-ink-faint">{categoryLabel(m.category)}</span>
                 </Link>
               </li>
             ))}

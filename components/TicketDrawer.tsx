@@ -104,6 +104,16 @@ export function TicketDrawer() {
                     : 'Linked drawing'} →
                 </a>
               )}
+              {detail.material_id && (
+                <a
+                  href={`/materials/${detail.material_id}`}
+                  className="mt-1 block text-xs text-primary hover:underline"
+                >
+                  {(detail as unknown as { material?: { name: string } | null }).material?.name
+                    ? `${(detail as unknown as { material?: { name: string } | null }).material!.name} — linked material`
+                    : 'Linked material'} →
+                </a>
+              )}
             </div>
             {isSite && (
               <div className="space-y-3">

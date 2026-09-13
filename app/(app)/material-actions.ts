@@ -14,6 +14,7 @@ export async function createMaterial(formData: FormData) {
   await supabase.from('materials').insert({
     project_id: projectId,
     room_id: opt('room_id'),
+    drawing_id: opt('drawing_id'),
     category: String(formData.get('category')) as never,
     name,
     manufacturer: opt('manufacturer'),

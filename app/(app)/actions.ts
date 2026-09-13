@@ -66,6 +66,7 @@ export async function createTicket(formData: FormData) {
     due_date: opt('due_date'),
     drawing_id: opt('drawing_id'),
     drawing_revision_id: opt('drawing_revision_id'),
+    material_id: opt('material_id'),
     reporter_id: user!.id,
   })
   revalidatePath(`/projects/${formData.get('project_id')}`, 'layout')
@@ -124,7 +125,7 @@ export async function getTicketDetail(id: string) {
   const supabase = await createClient()
   const { data: t } = await supabase
     .from('tickets')
-    .select('id, seq, type, discipline, title, description, status, priority, due_date, project_id, drawing_id, drawing:drawing_id(drawing_number, title)')
+    .select('id, seq, type, discipline, title, description, status, priority, due_date, project_id, drawing_id, drawing:drawing_id(drawing_number, title), material_id, material:material_id(name)')
     .eq('id', id)
     .single()
   if (!t) return null

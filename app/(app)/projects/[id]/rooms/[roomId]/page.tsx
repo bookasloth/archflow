@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/ui/PageHeader'
@@ -60,7 +61,13 @@ export default async function RoomPage({
       />
 
       <Section title="New ticket in this room">
-        <NewTicketForm projectId={id} buildingId={buildingId} floorId={r.floor_id} roomId={r.id} />
+        <NewTicketForm
+          projectId={id}
+          buildingId={buildingId}
+          floorId={r.floor_id}
+          roomId={r.id}
+          materials={mats.map((m) => ({ id: m.id, label: m.name }))}
+        />
       </Section>
 
       <Section title={`Work · ${tasks.length}`}>
@@ -77,9 +84,11 @@ export default async function RoomPage({
         ) : (
           <ul className="divide-y divide-subtle rounded-lg border border-subtle bg-surface text-sm">
             {mats.map((m) => (
-              <li key={m.id} className="flex items-center justify-between p-2.5">
-                <span className="text-ink">{m.name}</span>
-                <span className="text-xs text-ink-muted">{m.category} · {m.status.replace(/_/g, ' ')}</span>
+              <li key={m.id} className="hover:bg-surface-hover">
+                <Link href={`/materials/${m.id}`} className="flex items-center justify-between p-2.5">
+                  <span className="text-ink">{m.name}</span>
+                  <span className="text-xs text-ink-muted">{m.category} · {m.status.replace(/_/g, ' ')}</span>
+                </Link>
               </li>
             ))}
           </ul>

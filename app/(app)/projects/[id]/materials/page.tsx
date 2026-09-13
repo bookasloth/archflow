@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { NewMaterialForm, type RoomOption } from '@/components/NewMaterialForm'
+import { NewMaterialForm, type RoomOption, type DrawingOption } from '@/components/NewMaterialForm'
 import { MaterialList } from '@/components/MaterialList'
 import { MaterialFilters } from '@/components/MaterialFilters'
 
@@ -30,6 +30,14 @@ export default async function MaterialsPage({
     .flatMap((b) => b.floors ?? [])
     .flatMap((f) => f.rooms ?? [])
 
+  const { data: drawingRows } = await supabase
+    .from('drawings')
+    .select('id, drawing_number, title')
+    .eq('project_id', id)
+    .order('drawing_number')
+  const drawings: DrawingOption[] = ((drawingRows as { id: string; drawing_number: string | null; title: string }[]) ?? [])
+    .map((d) => ({ id: d.id, label: d.drawing_number ? `${d.drawing_number} — ${d.title}` : d.title }))
+
   let q = supabase
     .from('materials')
     .select('id, name, manufacturer, category, status, rooms(name)')
@@ -50,7 +58,7 @@ export default async function MaterialsPage({
         <h1 className="text-xl font-semibold">{project?.name} — Materials</h1>
         <Link href={`/projects/${id}`} className="text-sm text-gray-500">← project</Link>
       </div>
-      <NewMaterialForm projectId={id} rooms={rooms} />
+      <NewMaterialForm projectId={id} rooms={rooms} drawings={drawings} />
       <MaterialFilters />
       <MaterialList materials={materials} />
     </main>

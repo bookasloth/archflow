@@ -58,6 +58,14 @@ export default async function ProjectWorkPage({
     })),
   )
 
+  const { data: materialRows } = await supabase
+    .from('materials')
+    .select('id, name')
+    .eq('project_id', id)
+    .order('name')
+  const materials = ((materialRows as { id: string; name: string }[]) ?? [])
+    .map((m) => ({ id: m.id, label: m.name }))
+
   return (
     <main className="flex gap-6">
       <HierarchySidebar projectId={id} buildings={(buildings as never) ?? []} />
@@ -67,7 +75,7 @@ export default async function ProjectWorkPage({
           <Link href={`/projects/${id}/drawings`} className="text-sm text-gray-500">Drawings →</Link>
           <Link href={`/projects/${id}/materials`} className="text-sm text-gray-500">Materials →</Link>
         </div>
-        <NewTicketForm projectId={id} revisionOptions={revisionOptions} />
+        <NewTicketForm projectId={id} revisionOptions={revisionOptions} materials={materials} />
         <div className="flex items-center justify-between">
           <TicketFilters
             assignees={(profiles as { id: string; full_name: string | null }[]) ?? []}

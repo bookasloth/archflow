@@ -26,7 +26,7 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
 
   const { data: t } = await supabase
     .from('tickets')
-    .select('id, seq, type, discipline, title, description, status, priority, due_date, project_id, drawing_id')
+    .select('id, seq, type, discipline, title, description, status, priority, due_date, project_id, drawing_id, material_id, material:material_id(name)')
     .eq('id', id)
     .single()
   if (!t) notFound()
@@ -70,6 +70,13 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
       >
         {t.drawing_id && (
           <Link href={`/drawings/${t.drawing_id}`} className="text-xs text-blue-600">linked drawing →</Link>
+        )}
+        {t.material_id && (
+          <Link href={`/materials/${t.material_id}`} className="text-xs text-blue-600">
+            {(t as unknown as { material?: { name: string } | null }).material?.name
+              ? `${(t as unknown as { material?: { name: string } | null }).material!.name} — linked material`
+              : 'linked material'} →
+          </Link>
         )}
       </PageHeader>
       {t.description && <p className="text-sm">{t.description}</p>}

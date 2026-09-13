@@ -2,11 +2,13 @@
 import { createTicket } from '@/app/(app)/actions'
 import { DrawingRevisionSelect, type RevisionOption } from '@/components/DrawingRevisionSelect'
 
+export type MaterialOption = { id: string; label: string }
+
 const DISCIPLINE = ['architectural', 'structural', 'electrical', 'plumbing', 'fire_safety',
   'interior', 'landscape', 'construction', 'documentation', 'client_coordination']
 
-export function NewTicketForm({ projectId, revisionOptions = [], buildingId, floorId, roomId }:
-  { projectId: string; revisionOptions?: RevisionOption[]; buildingId?: string; floorId?: string; roomId?: string }) {
+export function NewTicketForm({ projectId, revisionOptions = [], materials = [], buildingId, floorId, roomId }:
+  { projectId: string; revisionOptions?: RevisionOption[]; materials?: MaterialOption[]; buildingId?: string; floorId?: string; roomId?: string }) {
   return (
     <form action={createTicket} className="flex flex-wrap items-center gap-2 text-sm">
       <input type="hidden" name="project_id" value={projectId} />
@@ -30,6 +32,12 @@ export function NewTicketForm({ projectId, revisionOptions = [], buildingId, flo
       </select>
       <input name="due_date" type="date" className="rounded border p-1" />
       {revisionOptions.length > 0 && <DrawingRevisionSelect options={revisionOptions} />}
+      {materials.length > 0 && (
+        <select name="material_id" className="rounded border p-1" defaultValue="">
+          <option value="">no material</option>
+          {materials.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+        </select>
+      )}
       <button className="rounded bg-black px-3 text-white">Add</button>
     </form>
   )

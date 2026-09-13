@@ -78,7 +78,7 @@ export interface Database {
           type: TicketType; discipline: Discipline; title: string; description: string | null
           status: TicketStatus; priority: Priority
           assignee_id: string | null; reporter_id: string; due_date: string | null; created_at: string
-          drawing_id: string | null; drawing_revision_id: string | null
+          drawing_id: string | null; drawing_revision_id: string | null; material_id: string | null
         }
         Insert: {
           id?: string; project_id: string
@@ -86,7 +86,7 @@ export interface Database {
           type: TicketType; discipline: Discipline; title: string; description?: string | null
           status?: TicketStatus; priority?: Priority
           assignee_id?: string | null; reporter_id: string; due_date?: string | null; created_at?: string
-          drawing_id?: string | null; drawing_revision_id?: string | null
+          drawing_id?: string | null; drawing_revision_id?: string | null; material_id?: string | null
         }
         Update: {
           id?: string; project_id?: string
@@ -94,7 +94,7 @@ export interface Database {
           type?: TicketType; discipline?: Discipline; title?: string; description?: string | null
           status?: TicketStatus; priority?: Priority
           assignee_id?: string | null; reporter_id?: string; due_date?: string | null; created_at?: string
-          drawing_id?: string | null; drawing_revision_id?: string | null
+          drawing_id?: string | null; drawing_revision_id?: string | null; material_id?: string | null
         }
         Relationships: []
       }
@@ -168,7 +168,7 @@ export interface Database {
           finish: string | null; color: string | null; size: string | null
           cost: number | null; supplier: string | null; notes: string | null
           status: MaterialStatus; decided_at: string | null; decided_by: string | null
-          created_by: string | null; created_at: string
+          created_by: string | null; created_at: string; drawing_id: string | null
         }
         Insert: {
           id?: string; project_id: string; room_id?: string | null; category: MaterialCategory
@@ -176,7 +176,7 @@ export interface Database {
           finish?: string | null; color?: string | null; size?: string | null
           cost?: number | null; supplier?: string | null; notes?: string | null
           status?: MaterialStatus; decided_at?: string | null; decided_by?: string | null
-          created_by?: string | null; created_at?: string
+          created_by?: string | null; created_at?: string; drawing_id?: string | null
         }
         Update: {
           id?: string; project_id?: string; room_id?: string | null; category?: MaterialCategory
@@ -184,7 +184,7 @@ export interface Database {
           finish?: string | null; color?: string | null; size?: string | null
           cost?: number | null; supplier?: string | null; notes?: string | null
           status?: MaterialStatus; decided_at?: string | null; decided_by?: string | null
-          created_by?: string | null; created_at?: string
+          created_by?: string | null; created_at?: string; drawing_id?: string | null
         }
         Relationships: []
       }

@@ -1,4 +1,6 @@
-type Att = { id: string; url: string; kind: string; ext: string }
+import { RevisionPreview } from '@/components/RevisionPreview'
+
+type Att = { id: string; url: string; kind: string; path: string }
 
 export function MaterialAttachments({ attachments }: { attachments: Att[] }) {
   const photos = attachments.filter((a) => a.kind === 'photo')
@@ -13,17 +15,9 @@ export function MaterialAttachments({ attachments }: { attachments: Att[] }) {
           ))}
         </div>
       )}
-      {datasheets.length > 0 && (
-        <ul className="text-sm">
-          {datasheets.map((d) => (
-            <li key={d.id}>
-              <a href={d.url} target="_blank" rel="noreferrer" className="text-blue-600 underline">
-                Datasheet (.{d.ext})
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
+      {datasheets.map((d) => (
+        <RevisionPreview key={d.id} url={d.url} path={d.path} />
+      ))}
       {attachments.length === 0 && <p className="text-sm text-gray-400">No photos or datasheets.</p>}
     </div>
   )
