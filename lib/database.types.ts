@@ -79,6 +79,7 @@ export interface Database {
           status: TicketStatus; priority: Priority
           assignee_id: string | null; reporter_id: string; due_date: string | null; created_at: string
           drawing_id: string | null; drawing_revision_id: string | null; material_id: string | null
+          parent_id: string | null; start_date: string | null
         }
         Insert: {
           id?: string; project_id: string
@@ -87,6 +88,7 @@ export interface Database {
           status?: TicketStatus; priority?: Priority
           assignee_id?: string | null; reporter_id: string; due_date?: string | null; created_at?: string
           drawing_id?: string | null; drawing_revision_id?: string | null; material_id?: string | null
+          parent_id?: string | null; start_date?: string | null
         }
         Update: {
           id?: string; project_id?: string
@@ -95,6 +97,7 @@ export interface Database {
           status?: TicketStatus; priority?: Priority
           assignee_id?: string | null; reporter_id?: string; due_date?: string | null; created_at?: string
           drawing_id?: string | null; drawing_revision_id?: string | null; material_id?: string | null
+          parent_id?: string | null; start_date?: string | null
         }
         Relationships: []
       }
@@ -201,6 +204,45 @@ export interface Database {
           id?: string; material_id?: string; storage_path?: string
           kind?: MaterialAttachmentKind; uploaded_by?: string | null; created_at?: string
         }
+        Relationships: []
+      }
+      tags: {
+        Row: { id: string; name: string; color: string | null; created_at: string }
+        Insert: { id?: string; name: string; color?: string | null; created_at?: string }
+        Update: { id?: string; name?: string; color?: string | null; created_at?: string }
+        Relationships: []
+      }
+      ticket_tags: {
+        Row: { ticket_id: string; tag_id: string }
+        Insert: { ticket_id: string; tag_id: string }
+        Update: { ticket_id?: string; tag_id?: string }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          id: string; project_id: string | null; title: string; content: unknown
+          icon: string | null; created_by: string | null; created_at: string; updated_at: string
+        }
+        Insert: {
+          id?: string; project_id?: string | null; title?: string; content?: unknown
+          icon?: string | null; created_by?: string | null; created_at?: string; updated_at?: string
+        }
+        Update: {
+          id?: string; project_id?: string | null; title?: string; content?: unknown
+          icon?: string | null; created_by?: string | null; created_at?: string; updated_at?: string
+        }
+        Relationships: []
+      }
+      favorites: {
+        Row: { user_id: string; entity_type: string; entity_id: string; created_at: string }
+        Insert: { user_id: string; entity_type: string; entity_id: string; created_at?: string }
+        Update: { user_id?: string; entity_type?: string; entity_id?: string; created_at?: string }
+        Relationships: []
+      }
+      recently_viewed: {
+        Row: { user_id: string; entity_type: string; entity_id: string; viewed_at: string }
+        Insert: { user_id: string; entity_type: string; entity_id: string; viewed_at?: string }
+        Update: { user_id?: string; entity_type?: string; entity_id?: string; viewed_at?: string }
         Relationships: []
       }
     }
