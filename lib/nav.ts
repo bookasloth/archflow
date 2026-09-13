@@ -3,6 +3,7 @@ export type NavLink = { label: string; href: string }
 export const workspaceNav: NavLink[] = [
   { label: 'Overview', href: '/' },
   { label: 'My Work', href: '/my-work' },
+  { label: 'Approvals', href: '/approvals' },
 ]
 
 export const managementNav: NavLink[] = [
