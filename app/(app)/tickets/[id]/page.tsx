@@ -69,10 +69,10 @@ export default async function TicketPage({ params }: { params: Promise<{ id: str
         }
       >
         {t.drawing_id && (
-          <Link href={`/drawings/${t.drawing_id}`} className="text-xs text-blue-600">linked drawing →</Link>
+          <Link href={`/drawings/${t.drawing_id}`} className="text-xs text-primary">linked drawing →</Link>
         )}
         {t.material_id && (
-          <Link href={`/materials/${t.material_id}`} className="text-xs text-blue-600">
+          <Link href={`/materials/${t.material_id}`} className="text-xs text-primary">
             {(t as unknown as { material?: { name: string } | null }).material?.name
               ? `${(t as unknown as { material?: { name: string } | null }).material!.name} — linked material`
               : 'linked material'} →

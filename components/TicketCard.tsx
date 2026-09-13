@@ -48,13 +48,13 @@ export function TicketCard({
       className="cursor-pointer space-y-1 rounded border bg-white p-2 text-sm shadow-sm hover:border-gray-400"
     >
       <div className="flex items-center justify-between">
-        <span className="font-mono text-xs text-gray-500">
+        <span className="font-mono text-xs text-ink-muted">
           {(ticket.type === 'site_issue' ? 'SITE-' : 'TASK-') + ticket.seq}
         </span>
         <PriorityBadge priority={ticket.priority as Priority} />
       </div>
       <div className="font-medium">{ticket.title}</div>
-      <div className="flex items-center justify-between text-xs text-gray-500">
+      <div className="flex items-center justify-between text-xs text-ink-muted">
         <DisciplineBadge discipline={ticket.discipline as Discipline} />
         {ticket.due_date && <span>due {ticket.due_date}</span>}
       </div>

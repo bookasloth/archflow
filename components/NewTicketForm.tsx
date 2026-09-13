@@ -39,7 +39,7 @@ export function NewTicketForm({ projectId, revisionOptions = [], materials = [],
           {materials.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
         </select>
       )}
-      <button className="rounded bg-black px-3 text-white">Add</button>
+      <button className="rounded bg-primary px-3 hover:bg-primary-hover text-white">Add</button>
     </form>
   )
 }

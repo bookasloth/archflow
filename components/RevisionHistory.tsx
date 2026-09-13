@@ -16,7 +16,7 @@ type Rev = {
 }
 
 export function RevisionHistory({ revisions }: { revisions: Rev[] }) {
-  if (revisions.length === 0) return <p className="text-sm text-gray-500">No revisions yet.</p>
+  if (revisions.length === 0) return <p className="text-sm text-ink-muted">No revisions yet.</p>
   return (
     <ul className="divide-y rounded border">
       {revisions.map((r) => (
@@ -24,7 +24,7 @@ export function RevisionHistory({ revisions }: { revisions: Rev[] }) {
           <span className="flex items-center gap-3">
             <span className="font-mono">{formatRevision(r.revision_no)}</span>
             <RevisionBadge status={r.status} />
-            <span className="text-xs text-gray-500">{r.uploader ?? 'someone'}</span>
+            <span className="text-xs text-ink-muted">{r.uploader ?? 'someone'}</span>
           </span>
           <span className="flex gap-1">
             {allowedRevisionTransitions(r.status).map((to) => (

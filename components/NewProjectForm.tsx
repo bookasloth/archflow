@@ -7,7 +7,7 @@ export function NewProjectForm() {
       <input name="name" placeholder="Project name" required className="rounded border p-2" />
       <input name="code" placeholder="Code" className="rounded border p-2" />
       <input name="client_name" placeholder="Client" className="rounded border p-2" />
-      <button className="rounded bg-black px-3 text-white">Add</button>
+      <button className="rounded bg-primary px-3 hover:bg-primary-hover text-white">Add</button>
     </form>
   )
 }

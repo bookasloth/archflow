@@ -61,9 +61,9 @@ export default async function MaterialPage({ params }: { params: Promise<{ id: s
   return (
     <main className="max-w-3xl space-y-5">
       <div>
-        <Link href={`/projects/${mat.project_id}/materials`} className="text-sm text-gray-500">← materials</Link>
+        <Link href={`/projects/${mat.project_id}/materials`} className="text-sm text-ink-muted">← materials</Link>
         <h1 className="text-xl font-semibold">{mat.name}</h1>
-        <div className="text-xs text-gray-500">{categoryLabel(mat.category)}</div>
+        <div className="text-xs text-ink-muted">{categoryLabel(mat.category)}</div>
         {mat.drawing_id && (
           <Link
             href={`/drawings/${mat.drawing_id}`}
@@ -77,7 +77,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ id: s
       <MaterialStatusControl id={mat.id} status={mat.status} />
 
       {mat.status !== 'proposed' && mat.decided_at && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-ink-muted">
           {mat.status} by {mat.decider?.full_name ?? 'someone'} on {mat.decided_at.slice(0, 10)}
         </p>
       )}
@@ -85,7 +85,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ id: s
       <dl className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
         {fields.filter(([, v]) => v !== null && v !== '').map(([k, v]) => (
           <div key={k} className="flex justify-between border-b py-1">
-            <dt className="text-gray-500">{k}</dt>
+            <dt className="text-ink-muted">{k}</dt>
             <dd>{v}</dd>
           </div>
         ))}
@@ -100,7 +100,7 @@ export default async function MaterialPage({ params }: { params: Promise<{ id: s
       <section className="space-y-2">
         <h4 className="text-sm font-medium">Linked tickets · {linkedTickets.length}</h4>
         {linkedTickets.length === 0 ? (
-          <p className="text-sm text-gray-400">None.</p>
+          <p className="text-sm text-ink-faint">None.</p>
         ) : (
           <ul className="divide-y divide-subtle rounded-lg border border-subtle bg-surface text-sm">
             {linkedTickets.map((t) => (

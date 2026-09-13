@@ -49,7 +49,7 @@ export function AddPhoto({
         <button
           disabled={busy}
           onClick={submit}
-          className="rounded bg-black px-3 py-1 text-sm text-white disabled:opacity-50"
+          className="rounded bg-primary px-3 hover:bg-primary-hover py-1 text-sm text-white disabled:opacity-50"
         >
           {busy ? 'Uploading…' : `Save ${kind} photo`}
         </button>

@@ -9,14 +9,14 @@ export function CommentThread({ ticketId, comments }: { ticketId: string; commen
       <ul className="space-y-1 text-sm">
         {comments.map((c) => (
           <li key={c.id}>
-            <span className="text-gray-500">{c.author ?? 'someone'}:</span> {c.body}
+            <span className="text-ink-muted">{c.author ?? 'someone'}:</span> {c.body}
           </li>
         ))}
       </ul>
       <form action={addComment} className="flex gap-2">
         <input type="hidden" name="ticket_id" value={ticketId} />
         <input name="body" placeholder="Add a comment" className="flex-1 rounded border p-1 text-sm" />
-        <button className="rounded bg-black px-3 text-sm text-white">Post</button>
+        <button className="rounded bg-primary px-3 hover:bg-primary-hover text-sm text-white">Post</button>
       </form>
     </section>
   )

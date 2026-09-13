@@ -56,7 +56,7 @@ export default async function MaterialsPage({
     <main className="space-y-4">
       <div className="flex items-center gap-3">
         <h1 className="text-xl font-semibold">{project?.name} — Materials</h1>
-        <Link href={`/projects/${id}`} className="text-sm text-gray-500">← project</Link>
+        <Link href={`/projects/${id}`} className="text-sm text-ink-muted">← project</Link>
       </div>
       <NewMaterialForm projectId={id} rooms={rooms} drawings={drawings} />
       <MaterialFilters />

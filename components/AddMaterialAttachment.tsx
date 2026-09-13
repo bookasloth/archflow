@@ -43,11 +43,11 @@ export function AddMaterialAttachment({ materialId, projectId }: { materialId: s
         </select>
         <input type="file" accept="image/*,.pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
         <button disabled={!file || busy} onClick={submit}
-          className="rounded bg-black px-3 py-1 text-sm text-white disabled:opacity-50">
+          className="rounded bg-primary px-3 hover:bg-primary-hover py-1 text-sm text-white disabled:opacity-50">
           {busy ? 'Uploading…' : 'Add'}
         </button>
       </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
     </div>
   )
 }

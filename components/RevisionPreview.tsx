@@ -11,7 +11,7 @@ export function RevisionPreview({ url, path }: { url: string; path: string }) {
     return <img src={url} alt="" className="max-w-full rounded border" />
   }
   return (
-    <a href={url} className="text-sm text-blue-600 underline" target="_blank" rel="noreferrer">
+    <a href={url} className="text-sm text-primary underline" target="_blank" rel="noreferrer">
       Download file (.{ext})
     </a>
   )

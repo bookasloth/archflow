@@ -34,7 +34,7 @@ export function NewMaterialForm({ projectId, rooms, drawings = [] }:
       <input name="cost" type="number" step="0.01" placeholder="Cost" className="w-24 rounded border p-1" />
       <input name="supplier" placeholder="Supplier" className="rounded border p-1" />
       <input name="notes" placeholder="Notes" className="rounded border p-1" />
-      <button type="submit" className="rounded bg-black px-3 text-white">Add material</button>
+      <button type="submit" className="rounded bg-primary px-3 hover:bg-primary-hover text-white">Add material</button>
     </form>
   )
 }

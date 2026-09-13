@@ -18,7 +18,7 @@ export function MaterialAttachments({ attachments }: { attachments: Att[] }) {
       {datasheets.map((d) => (
         <RevisionPreview key={d.id} url={d.url} path={d.path} />
       ))}
-      {attachments.length === 0 && <p className="text-sm text-gray-400">No photos or datasheets.</p>}
+      {attachments.length === 0 && <p className="text-sm text-ink-faint">No photos or datasheets.</p>}
     </div>
   )
 }

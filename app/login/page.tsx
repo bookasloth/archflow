@@ -38,12 +38,12 @@ export default function Login() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
         <button className="w-full rounded bg-black p-2 text-white" type="submit">
           Sign in
         </button>
       </form>
-      <p className="mt-4 text-xs text-gray-500">Accounts are created by an admin in Supabase.</p>
+      <p className="mt-4 text-xs text-ink-muted">Accounts are created by an admin in Supabase.</p>
     </main>
   )
 }

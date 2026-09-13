@@ -13,7 +13,7 @@ export function NewDrawingForm({ projectId }: { projectId: string }) {
       <select name="discipline" className="rounded border p-1">
         {DISCIPLINE.map((d) => <option key={d} value={d}>{d || 'discipline'}</option>)}
       </select>
-      <button type="submit" className="rounded bg-black px-3 text-white">Add drawing</button>
+      <button type="submit" className="rounded bg-primary px-3 hover:bg-primary-hover text-white">Add drawing</button>
     </form>
   )
 }

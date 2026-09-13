@@ -53,7 +53,7 @@ export function SiteCapture({ projects }: { projects: { id: string; name: string
       <input type="file" accept="image/*" capture="environment" onChange={onFile} className="w-full" />
       {preview && <PhotoMarker src={preview} value={markers} editable onChange={setMarkers} />}
       {preview && (
-        <p className="text-xs text-gray-500">Tap the photo to mark problem spots ({markers.length}).</p>
+        <p className="text-xs text-ink-muted">Tap the photo to mark problem spots ({markers.length}).</p>
       )}
       <input
         className="w-full rounded border p-2"

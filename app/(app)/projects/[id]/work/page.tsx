@@ -75,8 +75,9 @@ export default async function ProjectWorkPage({
       <div className="flex-1 space-y-4">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-semibold">{project?.name}</h1>
-          <Link href={`/projects/${id}/drawings`} className="text-sm text-gray-500">Drawings →</Link>
-          <Link href={`/projects/${id}/materials`} className="text-sm text-gray-500">Materials →</Link>
+          <Link href={`/projects/${id}/drawings`} className="text-sm text-ink-muted hover:text-ink">Drawings →</Link>
+          <Link href={`/projects/${id}/materials`} className="text-sm text-ink-muted hover:text-ink">Materials →</Link>
+          <Link href={`/projects/${id}/docs`} className="text-sm text-ink-muted hover:text-ink">Docs →</Link>
         </div>
         <NewTicketForm projectId={id} revisionOptions={revisionOptions} materials={materials} />
         <div className="flex items-center justify-between">

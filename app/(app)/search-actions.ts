@@ -1,7 +1,7 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
 
-export type SearchHit = { id: string; kind: 'Project' | 'Ticket' | 'Drawing' | 'Material'; label: string; href: string }
+export type SearchHit = { id: string; kind: 'Project' | 'Ticket' | 'Drawing' | 'Material' | 'Page'; label: string; href: string }
 
 // Cross-entity search for the command menu. ilike on the natural title field of each
 // entity; a handful of results each. Read-only; RLS scopes what the caller can see.
@@ -11,11 +11,12 @@ export async function globalSearch(query: string): Promise<SearchHit[]> {
   const like = `%${q}%`
   const supabase = await createClient()
 
-  const [pr, tk, dr, mt] = await Promise.all([
+  const [pr, tk, dr, mt, dc] = await Promise.all([
     supabase.from('projects').select('id, name').ilike('name', like).limit(5),
     supabase.from('tickets').select('id, seq, type, title, project_id').ilike('title', like).order('seq', { ascending: false }).limit(5),
     supabase.from('drawings').select('id, title, drawing_number').ilike('title', like).limit(5),
     supabase.from('materials').select('id, name').ilike('name', like).limit(5),
+    supabase.from('documents').select('id, title').ilike('title', like).limit(5),
   ])
 
   const hits: SearchHit[] = []
@@ -39,6 +40,9 @@ export async function globalSearch(query: string): Promise<SearchHit[]> {
 
   for (const m of (mt.data as { id: string; name: string }[]) ?? [])
     hits.push({ id: `m-${m.id}`, kind: 'Material', label: m.name, href: `/materials/${m.id}` })
+
+  for (const d of (dc.data as { id: string; title: string }[]) ?? [])
+    hits.push({ id: `dc-${d.id}`, kind: 'Page', label: d.title || 'Untitled', href: `/docs/${d.id}` })
 
   return hits
 }
