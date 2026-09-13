@@ -69,6 +69,7 @@ export async function createTicket(formData: FormData) {
     drawing_revision_id: opt('drawing_revision_id'),
     material_id: opt('material_id'),
     parent_id: opt('parent_id'),
+    assignee_id: opt('assignee_id') || user!.id, // default: assign to the creator
     reporter_id: user!.id,
   })
   revalidatePath(`/projects/${formData.get('project_id')}`, 'layout')

@@ -48,6 +48,9 @@ export default async function RoomPage({
   type Mat = { id: string; name: string; status: string; category: string }
   const mats = (materials as Mat[]) ?? []
 
+  const { data: profiles } = await supabase.from('profiles').select('id, full_name').order('full_name')
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <div className="max-w-4xl space-y-5">
       <PageHeader
@@ -67,6 +70,8 @@ export default async function RoomPage({
           floorId={r.floor_id}
           roomId={r.id}
           materials={mats.map((m) => ({ id: m.id, label: m.name }))}
+          assignees={(profiles as { id: string; full_name: string | null }[]) ?? []}
+          currentUserId={user?.id}
         />
       </Section>
 

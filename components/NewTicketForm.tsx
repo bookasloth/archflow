@@ -3,12 +3,13 @@ import { createTicket } from '@/app/(app)/actions'
 import { DrawingRevisionSelect, type RevisionOption } from '@/components/DrawingRevisionSelect'
 
 export type MaterialOption = { id: string; label: string }
+export type Assignee = { id: string; full_name: string | null }
 
 const DISCIPLINE = ['architectural', 'structural', 'electrical', 'plumbing', 'fire_safety',
   'interior', 'landscape', 'construction', 'documentation', 'client_coordination']
 
-export function NewTicketForm({ projectId, revisionOptions = [], materials = [], buildingId, floorId, roomId }:
-  { projectId: string; revisionOptions?: RevisionOption[]; materials?: MaterialOption[]; buildingId?: string; floorId?: string; roomId?: string }) {
+export function NewTicketForm({ projectId, revisionOptions = [], materials = [], assignees = [], currentUserId, buildingId, floorId, roomId }:
+  { projectId: string; revisionOptions?: RevisionOption[]; materials?: MaterialOption[]; assignees?: Assignee[]; currentUserId?: string; buildingId?: string; floorId?: string; roomId?: string }) {
   return (
     <form action={createTicket} className="flex flex-wrap items-center gap-2 text-sm">
       <input type="hidden" name="project_id" value={projectId} />
@@ -30,6 +31,11 @@ export function NewTicketForm({ projectId, revisionOptions = [], materials = [],
           <option key={p}>{p}</option>
         ))}
       </select>
+      {assignees.length > 0 && (
+        <select name="assignee_id" aria-label="Assignee" className="rounded border p-1" defaultValue={currentUserId ?? ''}>
+          {assignees.map((a) => <option key={a.id} value={a.id}>{a.full_name ?? 'Unnamed'}</option>)}
+        </select>
+      )}
       <input name="start_date" type="date" aria-label="Start date" className="rounded border p-1" />
       <input name="due_date" type="date" aria-label="Due date" className="rounded border p-1" />
       {revisionOptions.length > 0 && <DrawingRevisionSelect options={revisionOptions} />}

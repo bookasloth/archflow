@@ -34,6 +34,7 @@ export default async function ProjectWorkPage({
     .select('id, name, floors(id, name, rooms(id, name))')
     .eq('project_id', id)
   const { data: profiles } = await supabase.from('profiles').select('id, full_name').order('full_name')
+  const { data: { user } } = await supabase.auth.getUser()
 
   let q = supabase
     .from('tickets')
@@ -83,7 +84,8 @@ export default async function ProjectWorkPage({
 
       <WorkToolbar
         activeFilters={activeFilters}
-        newForm={<NewTicketForm projectId={id} revisionOptions={revisionOptions} materials={materials} />}
+        newForm={<NewTicketForm projectId={id} revisionOptions={revisionOptions} materials={materials}
+          assignees={(profiles as { id: string; full_name: string | null }[]) ?? []} currentUserId={user?.id} />}
         filters={
           <TicketFilters
             assignees={(profiles as { id: string; full_name: string | null }[]) ?? []}
