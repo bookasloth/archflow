@@ -20,7 +20,7 @@ export default function Login() {
 
   return (
     <main className="mx-auto max-w-sm p-8">
-      <h1 className="mb-6 text-2xl font-semibold">Archflow</h1>
+      <h1 className="mb-6 font-heading text-2xl font-semibold text-ink">Archflow</h1>
       <form onSubmit={submit} className="space-y-3">
         <input
           className="w-full rounded border p-2"
@@ -39,7 +39,7 @@ export default function Login() {
           required
         />
         {error && <p className="text-sm text-danger">{error}</p>}
-        <button className="w-full rounded bg-black p-2 text-white" type="submit">
+        <button className="w-full rounded bg-primary p-2 font-medium text-primary-fg hover:bg-primary-hover" type="submit">
           Sign in
         </button>
       </form>
