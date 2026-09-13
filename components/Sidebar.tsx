@@ -4,11 +4,12 @@ import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { SidebarNavItem } from '@/components/ui/SidebarNavItem'
 import { IconButton } from '@/components/ui/IconButton'
-import { workspaceNav, managementNav, projectNav, projectIdFromPath } from '@/lib/nav'
+import { workspaceNav, managementNav, adminNav, projectNav, projectIdFromPath } from '@/lib/nav'
+import { isAdmin, type Role } from '@/lib/permissions'
 
 const KEY = 'archflow.sidebar.collapsed'
 
-export function Sidebar() {
+export function Sidebar({ role }: { role?: Role | null }) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [projectName, setProjectName] = useState<string | null>(null)
@@ -76,6 +77,14 @@ export function Sidebar() {
             <SidebarNavItem key={n.href} href={n.href} label={n.label} active={isActive(n.href)} collapsed={collapsed} />
           ))}
         </Section>
+
+        {isAdmin(role) && (
+          <Section label="Admin" collapsed={collapsed}>
+            {adminNav.map((n) => (
+              <SidebarNavItem key={n.href} href={n.href} label={n.label} active={isActive(n.href)} collapsed={collapsed} />
+            ))}
+          </Section>
+        )}
       </nav>
     </aside>
   )

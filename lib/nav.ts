@@ -10,6 +10,11 @@ export const managementNav: NavLink[] = [
   { label: 'Activity', href: '/activity' },
 ]
 
+// Admin-only; the sidebar renders this section only for admins.
+export const adminNav: NavLink[] = [
+  { label: 'Users', href: '/admin/users' },
+]
+
 export function projectNav(projectId: string): NavLink[] {
   return [
     { label: 'Overview', href: `/projects/${projectId}` },
