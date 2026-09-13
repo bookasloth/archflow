@@ -13,10 +13,11 @@ const TOP: Record<string, string> = {
   drawings: 'Drawing',
   materials: 'Material',
   tickets: 'Ticket',
+  docs: 'Pages',
   admin: 'Admin',
 }
 const PROJECT_SUB: Record<string, string> = {
-  work: 'Work', drawings: 'Drawings', materials: 'Materials', rooms: 'Room',
+  work: 'Work', drawings: 'Drawings', materials: 'Materials', rooms: 'Room', docs: 'Docs',
 }
 
 // Contextual wayfinding in the top bar. Page bodies still own their H1 (PageHeader);

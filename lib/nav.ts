@@ -4,6 +4,7 @@ export const workspaceNav: NavLink[] = [
   { label: 'Overview', href: '/' },
   { label: 'My Work', href: '/my-work' },
   { label: 'Approvals', href: '/approvals' },
+  { label: 'Pages', href: '/docs' },
 ]
 
 export const managementNav: NavLink[] = [
@@ -23,6 +24,7 @@ export function projectNav(projectId: string): NavLink[] {
     { label: 'Drawings', href: `/projects/${projectId}/drawings` },
     { label: 'Site', href: `/site` },
     { label: 'Materials', href: `/projects/${projectId}/materials` },
+    { label: 'Docs', href: `/projects/${projectId}/docs` },
   ]
 }
 
