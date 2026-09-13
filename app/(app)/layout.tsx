@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUserWithRole } from '@/lib/auth'
 import { Sidebar } from '@/components/Sidebar'
+import { CommandMenu } from '@/components/CommandMenu'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, role } = await getCurrentUserWithRole()
@@ -10,10 +11,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Sidebar role={role} />
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center justify-between border-b border-subtle bg-surface px-5 py-2.5">
-          <div className="text-sm text-ink-faint">
-            {/* Breadcrumb + global search land in later slices */}
-            <span className="text-ink-muted">Search coming soon</span>
-          </div>
+          <CommandMenu />
           <div className="flex items-center gap-3">
             {role === 'admin' && (
               <span className="rounded-full border border-subtle px-2 py-0.5 text-[11px] text-ink-muted">admin</span>
