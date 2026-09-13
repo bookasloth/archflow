@@ -68,6 +68,7 @@ export async function createTicket(formData: FormData) {
     drawing_id: opt('drawing_id'),
     drawing_revision_id: opt('drawing_revision_id'),
     material_id: opt('material_id'),
+    parent_id: opt('parent_id'),
     reporter_id: user!.id,
   })
   revalidatePath(`/projects/${formData.get('project_id')}`, 'layout')
@@ -126,10 +127,23 @@ export async function getTicketDetail(id: string) {
   const supabase = await createClient()
   const { data: t } = await supabase
     .from('tickets')
-    .select('id, seq, type, discipline, title, description, status, priority, due_date, project_id, drawing_id, drawing:drawing_id(drawing_number, title), material_id, material:material_id(name)')
+    .select('id, seq, type, discipline, title, description, status, priority, due_date, start_date, project_id, drawing_id, drawing:drawing_id(drawing_number, title), material_id, material:material_id(name), parent_id, parent:parent_id(seq, type, title)')
     .eq('id', id)
     .single()
   if (!t) return null
+
+  const { data: subtaskRows } = await supabase
+    .from('tickets').select('id, seq, type, title, status')
+    .eq('parent_id', id).order('seq', { ascending: false })
+  const subtasks = (subtaskRows as { id: string; seq: number; type: string; title: string; status: string }[]) ?? []
+
+  const { data: tagRows } = await supabase
+    .from('ticket_tags').select('tag_id, tags(id, name, color)').eq('ticket_id', id)
+  type TagJoin = { tags: { id: string; name: string; color: string | null } | null }
+  const tags = ((tagRows as unknown as TagJoin[]) ?? []).map((r) => r.tags).filter(Boolean) as { id: string; name: string; color: string | null }[]
+
+  const { data: allTagRows } = await supabase.from('tags').select('id, name, color').order('name')
+  const allTags = (allTagRows as { id: string; name: string; color: string | null }[]) ?? []
 
   const { data: atts } = await supabase
     .from('attachments')
@@ -162,5 +176,5 @@ export async function getTicketDetail(id: string) {
     author: c.profiles?.full_name ?? null,
   }))
 
-  return { ...t, photos, comments: mapped }
+  return { ...t, photos, comments: mapped, subtasks, tags, allTags }
 }

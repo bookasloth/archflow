@@ -6,6 +6,7 @@ import { StatusControl } from '@/components/StatusControl'
 import { BeforeAfter } from '@/components/BeforeAfter'
 import { AddPhoto } from '@/components/AddPhoto'
 import { CommentThread } from '@/components/CommentThread'
+import { TicketExtras } from '@/components/TicketExtras'
 import type { TicketType, TicketStatus } from '@/lib/status'
 import type { Marker } from '@/components/PhotoMarker'
 
@@ -136,6 +137,22 @@ export function TicketDrawer() {
               onChanged={() => setReloadKey((k) => k + 1)}
             />
             {detail.description && <p className="text-sm">{detail.description}</p>}
+            <TicketExtras
+              ticketId={detail.id}
+              projectId={detail.project_id}
+              discipline={detail.discipline}
+              parentId={(detail as unknown as { parent_id: string | null }).parent_id}
+              parent={(detail as unknown as { parent: { seq: number; type: string; title: string } | null }).parent}
+              tags={(detail as unknown as { tags: { id: string; name: string; color: string | null }[] }).tags}
+              allTags={(detail as unknown as { allTags: { id: string; name: string; color: string | null }[] }).allTags}
+              subtasks={(detail as unknown as { subtasks: { id: string; seq: number; type: string; title: string; status: string }[] }).subtasks}
+              onChanged={() => setReloadKey((k) => k + 1)}
+              onOpenTicket={(tid) => {
+                const p = new URLSearchParams(params.toString())
+                p.set('ticket', tid)
+                router.replace(`${pathname}?${p.toString()}`)
+              }}
+            />
             {!isSite &&
               detail.photos.map((p, i) => (
                 // eslint-disable-next-line @next/next/no-img-element

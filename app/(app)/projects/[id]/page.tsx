@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Section } from '@/components/ui/Section'
 import { HealthDot } from '@/components/HealthDot'
+import { FavoriteButton } from '@/components/FavoriteButton'
+import { TrackView } from '@/components/TrackView'
 import { computeHealth, type HealthTicket } from '@/lib/health'
 
 export default async function ProjectOverviewPage({
@@ -14,6 +16,10 @@ export default async function ProjectOverviewPage({
   const supabase = await createClient()
 
   const { data: project } = await supabase.from('projects').select('name, code').eq('id', id).single()
+  const { data: { user } } = await supabase.auth.getUser()
+  const { data: favRow } = await supabase.from('favorites').select('entity_id')
+    .match({ user_id: user?.id ?? '', entity_type: 'project', entity_id: id }).maybeSingle()
+  const isFav = !!favRow
   const { data: tickets } = await supabase
     .from('tickets')
     .select('type, status, priority, due_date')
@@ -70,14 +76,18 @@ export default async function ProjectOverviewPage({
           </>
         }
         actions={
-          <Link
-            href={`/projects/${id}/work`}
-            className="inline-flex h-9 items-center rounded bg-primary px-3.5 text-sm font-medium text-primary-fg hover:bg-primary-hover"
-          >
-            Open work
-          </Link>
+          <>
+            <FavoriteButton entityType="project" entityId={id} initial={isFav} />
+            <Link
+              href={`/projects/${id}/work`}
+              className="inline-flex h-9 items-center rounded bg-primary px-3.5 text-sm font-medium text-primary-fg hover:bg-primary-hover"
+            >
+              Open work
+            </Link>
+          </>
         }
       />
+      <TrackView entityType="project" entityId={id} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Section title="Work" actions={<Link href={`/projects/${id}/work`} className="text-xs text-ink-muted hover:text-ink">View →</Link>}>

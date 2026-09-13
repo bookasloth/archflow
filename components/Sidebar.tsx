@@ -7,7 +7,9 @@ import type { Role } from '@/lib/permissions'
 const KEY = 'archflow.sidebar.collapsed'
 
 // Desktop sidebar (hidden on mobile — the mobile slide-over is MobileNav).
-export function Sidebar({ role, projects }: { role?: Role | null; projects: ProjectRef[] }) {
+export function Sidebar({ role, projects, favorites, recent }: {
+  role?: Role | null; projects: ProjectRef[]; favorites?: ProjectRef[]; recent?: ProjectRef[]
+}) {
   const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
@@ -33,7 +35,7 @@ export function Sidebar({ role, projects }: { role?: Role | null; projects: Proj
           <span aria-hidden>{collapsed ? '»' : '«'}</span>
         </IconButton>
       </div>
-      <SidebarContent role={role} projects={projects} collapsed={collapsed} />
+      <SidebarContent role={role} projects={projects} favorites={favorites} recent={recent} collapsed={collapsed} />
     </aside>
   )
 }

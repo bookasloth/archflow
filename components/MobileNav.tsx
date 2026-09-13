@@ -6,7 +6,9 @@ import { SidebarContent, type ProjectRef } from '@/components/SidebarContent'
 import type { Role } from '@/lib/permissions'
 
 // Mobile hamburger + slide-over. Hidden on desktop (Sidebar handles that).
-export function MobileNav({ role, projects }: { role?: Role | null; projects: ProjectRef[] }) {
+export function MobileNav({ role, projects, favorites, recent }: {
+  role?: Role | null; projects: ProjectRef[]; favorites?: ProjectRef[]; recent?: ProjectRef[]
+}) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -33,7 +35,7 @@ export function MobileNav({ role, projects }: { role?: Role | null; projects: Pr
                 <span aria-hidden>✕</span>
               </IconButton>
             </div>
-            <SidebarContent role={role} projects={projects} onNavigate={() => setOpen(false)} />
+            <SidebarContent role={role} projects={projects} favorites={favorites} recent={recent} onNavigate={() => setOpen(false)} />
           </aside>
         </div>
       )}

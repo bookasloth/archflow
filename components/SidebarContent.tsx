@@ -9,10 +9,12 @@ export type ProjectRef = { id: string; name: string }
 // The nav body shared by the desktop Sidebar and the mobile slide-over.
 // `collapsed` only applies on desktop; the mobile drawer always renders expanded.
 export function SidebarContent({
-  role, projects, collapsed = false, onNavigate,
+  role, projects, favorites = [], recent = [], collapsed = false, onNavigate,
 }: {
   role?: Role | null
   projects: ProjectRef[]
+  favorites?: ProjectRef[]
+  recent?: ProjectRef[]
   collapsed?: boolean
   onNavigate?: () => void
 }) {
@@ -32,6 +34,22 @@ export function SidebarContent({
           <SidebarNavItem key={n.href} href={n.href} label={n.label} active={isActive(n.href)} collapsed={collapsed} />
         ))}
       </Section>
+
+      {favorites.length > 0 && (
+        <Section label="Favorites" collapsed={collapsed}>
+          {favorites.map((p) => (
+            <SidebarNavItem key={p.id} href={`/projects/${p.id}`} label={p.name} active={pathname === `/projects/${p.id}`} collapsed={collapsed} />
+          ))}
+        </Section>
+      )}
+
+      {recent.length > 0 && !collapsed && (
+        <Section label="Recent" collapsed={collapsed}>
+          {recent.map((p) => (
+            <SidebarNavItem key={p.id} href={`/projects/${p.id}`} label={p.name} active={pathname === `/projects/${p.id}`} collapsed={collapsed} />
+          ))}
+        </Section>
+      )}
 
       <Section label="Projects" collapsed={collapsed}>
         {projects.length === 0 && !collapsed && (
