@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { HierarchySidebar } from '@/components/HierarchySidebar'
 import { TicketList } from '@/components/TicketList'
 import { TicketFilters } from '@/components/TicketFilters'
 import { ViewSwitcher } from '@/components/ViewSwitcher'
 import { ViewControls } from '@/components/ViewControls'
+import { WorkToolbar } from '@/components/WorkToolbar'
 import { CalendarView } from '@/components/CalendarView'
 import { TimelineView } from '@/components/TimelineView'
 import { KanbanBoard } from '@/components/KanbanBoard'
@@ -69,33 +69,36 @@ export default async function ProjectWorkPage({
   const materials = ((materialRows as { id: string; name: string }[]) ?? [])
     .map((m) => ({ id: m.id, label: m.name }))
 
+  const activeFilters = ['status', 'priority', 'discipline', 'assignee', 'building', 'floor', 'room', 'q']
+    .filter((k) => sp[k as keyof typeof sp]).length
+
   return (
-    <main className="flex gap-6">
-      <HierarchySidebar projectId={id} buildings={(buildings as never) ?? []} />
-      <div className="flex-1 space-y-4">
-        <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold">{project?.name}</h1>
-          <Link href={`/projects/${id}/drawings`} className="text-sm text-ink-muted hover:text-ink">Drawings →</Link>
-          <Link href={`/projects/${id}/materials`} className="text-sm text-ink-muted hover:text-ink">Materials →</Link>
-          <Link href={`/projects/${id}/docs`} className="text-sm text-ink-muted hover:text-ink">Docs →</Link>
-        </div>
-        <NewTicketForm projectId={id} revisionOptions={revisionOptions} materials={materials} />
-        <div className="flex items-center justify-between">
+    <main className="max-w-6xl space-y-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="font-heading text-xl font-semibold text-ink">{project?.name}</h1>
+        <Link href={`/projects/${id}/drawings`} className="text-sm text-ink-muted hover:text-ink">Drawings →</Link>
+        <Link href={`/projects/${id}/materials`} className="text-sm text-ink-muted hover:text-ink">Materials →</Link>
+        <Link href={`/projects/${id}/docs`} className="text-sm text-ink-muted hover:text-ink">Docs →</Link>
+      </div>
+
+      <WorkToolbar
+        activeFilters={activeFilters}
+        newForm={<NewTicketForm projectId={id} revisionOptions={revisionOptions} materials={materials} />}
+        filters={
           <TicketFilters
             assignees={(profiles as { id: string; full_name: string | null }[]) ?? []}
             buildings={(buildings as never) ?? []}
           />
-          <div className="flex items-center gap-1">
-            {view === 'table' && <ViewControls />}
-            <ViewSwitcher />
-          </div>
-        </div>
-        {view === 'kanban' && <KanbanBoard tickets={(tickets as never) ?? []} />}
-        {view === 'calendar' && <CalendarView tickets={(tickets as never) ?? []} />}
-        {view === 'timeline' && <TimelineView tickets={(tickets as never) ?? []} />}
-        {view === 'table' && <TicketList tickets={(tickets as never) ?? []} />}
-        <TicketDrawer />
-      </div>
+        }
+        controls={view === 'table' ? <ViewControls /> : undefined}
+        switcher={<ViewSwitcher />}
+      />
+
+      {view === 'kanban' && <KanbanBoard tickets={(tickets as never) ?? []} />}
+      {view === 'calendar' && <CalendarView tickets={(tickets as never) ?? []} />}
+      {view === 'timeline' && <TimelineView tickets={(tickets as never) ?? []} />}
+      {view === 'table' && <TicketList tickets={(tickets as never) ?? []} />}
+      <TicketDrawer />
     </main>
   )
 }
