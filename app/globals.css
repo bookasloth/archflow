@@ -14,12 +14,21 @@
   --ink-faint: #9A9A96;
   --focus: #3B82F6;
 
-  /* brand primary — orange (buttons only) */
-  --primary: #E8590C;
-  --primary-hover: #D24E08;
-  --primary-active: #B84406;
+  /* brand primary — orange #FE5000. Used for primary actions, active/selected states,
+     links and accents — NOT decoration. Kept off the focus ring (blue below) so keyboard
+     focus stays visually distinct from an orange "selected" state, and accessible. */
+  --primary: #FE5000;
+  --primary-hover: #E84800;
+  --primary-active: #CC3F00;
   --primary-fg: #FFFFFF;
-  --primary-soft: rgba(232, 89, 12, 0.10);
+  --primary-soft: rgba(254, 80, 0, 0.10);   /* ghost hover / selected tint */
+  --primary-muted: rgba(254, 80, 0, 0.16);  /* selected-row border, accent hairlines */
+
+  /* generic semantic feedback (toasts, error/empty states, inline validation) */
+  --success: #15803D;  --success-soft: #E6F4EA;
+  --warning: #B45309;  --warning-soft: #FBF0DD;
+  --danger:  #B91C1C;  --danger-soft:  #FBE7E7;
+  --info:    #1D4ED8;  --info-soft:    #E7EEFB;
 
   /* status (mirrors lib/status.ts / ticket-colors.ts) — soft bg + readable fg */
   --status-open-soft: #EEF1F4;         --status-open-fg: #475569;

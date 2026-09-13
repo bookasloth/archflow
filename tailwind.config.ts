@@ -16,7 +16,12 @@ export default {
           active: 'var(--primary-active)',
           fg: 'var(--primary-fg)',
           soft: 'var(--primary-soft)',
+          muted: 'var(--primary-muted)',
         },
+        success: { DEFAULT: 'var(--success)', soft: 'var(--success-soft)' },
+        warning: { DEFAULT: 'var(--warning)', soft: 'var(--warning-soft)' },
+        danger: { DEFAULT: 'var(--danger)', soft: 'var(--danger-soft)' },
+        info: { DEFAULT: 'var(--info)', soft: 'var(--info-soft)' },
         status: {
           'open': { soft: 'var(--status-open-soft)', fg: 'var(--status-open-fg)' },
           'in_progress': { soft: 'var(--status-in_progress-soft)', fg: 'var(--status-in_progress-fg)' },

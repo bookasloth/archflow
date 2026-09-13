@@ -1,12 +1,15 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react'
 
-type Variant = 'primary' | 'ghost' | 'subtle'
+type Variant = 'primary' | 'ghost' | 'subtle' | 'secondary' | 'destructive'
 type Size = 'sm' | 'md'
 
 const VARIANT: Record<Variant, string> = {
   primary: 'bg-primary text-primary-fg hover:bg-primary-hover active:bg-primary-active',
   ghost: 'text-ink hover:bg-primary-soft hover:text-primary',
   subtle: 'bg-surface text-ink border border-subtle hover:bg-surface-hover',
+  // secondary is the named alias for the bordered neutral button (same look as subtle)
+  secondary: 'bg-surface text-ink border border-subtle hover:bg-surface-hover',
+  destructive: 'text-danger hover:bg-danger-soft',
 }
 const SIZE: Record<Size, string> = {
   sm: 'h-7 px-2.5 text-xs',
