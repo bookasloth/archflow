@@ -1,29 +1,30 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentUserWithRole } from '@/lib/auth'
+import type { Role } from '@/lib/permissions'
 import { Sidebar } from '@/components/Sidebar'
 import { MobileNav } from '@/components/MobileNav'
 import { HeaderBreadcrumb } from '@/components/HeaderBreadcrumb'
 import { CommandMenu } from '@/components/CommandMenu'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, role } = await getCurrentUserWithRole()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const supabase = await createClient()
-  const { data: projectRows } = await supabase.from('projects').select('id, name').order('name')
-  const projects = (projectRows as { id: string; name: string }[]) ?? []
-  const byId = new Map(projects.map((p) => [p.id, p.name]))
-  const asRefs = (ids: string[]) => ids.filter((id) => byId.has(id)).map((id) => ({ id, name: byId.get(id)! }))
-
-  // Favorited + recently-viewed PROJECTS for the sidebar (names resolvable from the list above).
-  const [{ data: favRows }, { data: recentRows }] = await Promise.all([
+  // One parallel batch instead of four sequential round-trips (matters on every navigation).
+  const [roleRes, projectRes, favRes, recentRes] = await Promise.all([
+    supabase.from('profiles').select('role').eq('id', user.id).single(),
+    supabase.from('projects').select('id, name').order('name'),
     supabase.from('favorites').select('entity_id').eq('user_id', user.id).eq('entity_type', 'project'),
     supabase.from('recently_viewed').select('entity_id').eq('user_id', user.id).eq('entity_type', 'project')
       .order('viewed_at', { ascending: false }).limit(8),
   ])
-  const favorites = asRefs(((favRows as { entity_id: string }[]) ?? []).map((r) => r.entity_id))
-  const recent = asRefs(((recentRows as { entity_id: string }[]) ?? []).map((r) => r.entity_id))
+  const role = (roleRes.data?.role ?? 'staff') as Role
+  const projects = (projectRes.data as { id: string; name: string }[]) ?? []
+  const byId = new Map(projects.map((p) => [p.id, p.name]))
+  const asRefs = (ids: string[]) => ids.filter((id) => byId.has(id)).map((id) => ({ id, name: byId.get(id)! }))
+  const favorites = asRefs(((favRes.data as { entity_id: string }[]) ?? []).map((r) => r.entity_id))
+  const recent = asRefs(((recentRes.data as { entity_id: string }[]) ?? []).map((r) => r.entity_id))
 
   return (
     <div className="flex min-h-screen bg-bg">
