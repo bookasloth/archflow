@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { computeHealth, type HealthTicket } from '@/lib/health'
+import { ticketCounts } from '@/lib/portfolio'
 import { HealthDot } from '@/components/HealthDot'
 import { NewProjectForm } from '@/components/NewProjectForm'
 
@@ -37,14 +38,6 @@ export default async function Dashboard() {
     byProject.set(t.project_id, arr)
   }
   const iso = today.toISOString().slice(0, 10)
-  const counts = (list: HealthTicket[]) => ({
-    dueToday: list.filter((t) => t.due_date === iso).length,
-    overdue: list.filter(
-      (t) => t.due_date && t.due_date < iso && !['closed', 'verified'].includes(t.status),
-    ).length,
-    openSite: list.filter((t) => t.type === 'site_issue' && ['open', 'in_progress'].includes(t.status))
-      .length,
-  })
 
   return (
     <main className="space-y-6">
@@ -57,7 +50,7 @@ export default async function Dashboard() {
         <ul className="divide-y rounded border">
           {(projects ?? []).map((p) => {
             const list = byProject.get(p.id) ?? []
-            const c = counts(list)
+            const c = ticketCounts(list, iso)
             const pending = pendingByProject.get(p.id) ?? 0
             const matPending = materialsByProject.get(p.id) ?? 0
             return (
