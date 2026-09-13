@@ -30,7 +30,8 @@ export function NewTicketForm({ projectId, revisionOptions = [], materials = [],
           <option key={p}>{p}</option>
         ))}
       </select>
-      <input name="due_date" type="date" className="rounded border p-1" />
+      <input name="start_date" type="date" aria-label="Start date" className="rounded border p-1" />
+      <input name="due_date" type="date" aria-label="Due date" className="rounded border p-1" />
       {revisionOptions.length > 0 && <DrawingRevisionSelect options={revisionOptions} />}
       {materials.length > 0 && (
         <select name="material_id" className="rounded border p-1" defaultValue="">

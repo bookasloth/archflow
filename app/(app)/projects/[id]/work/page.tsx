@@ -5,6 +5,8 @@ import { TicketList } from '@/components/TicketList'
 import { TicketFilters } from '@/components/TicketFilters'
 import { ViewSwitcher } from '@/components/ViewSwitcher'
 import { ViewControls } from '@/components/ViewControls'
+import { CalendarView } from '@/components/CalendarView'
+import { TimelineView } from '@/components/TimelineView'
 import { KanbanBoard } from '@/components/KanbanBoard'
 import { TicketDrawer } from '@/components/TicketDrawer'
 import { NewTicketForm } from '@/components/NewTicketForm'
@@ -23,7 +25,7 @@ export default async function ProjectWorkPage({
 }) {
   const { id } = await params
   const sp = await searchParams
-  const view = sp.view === 'kanban' ? 'kanban' : 'table'
+  const view = ['kanban', 'calendar', 'timeline'].includes(sp.view ?? '') ? sp.view! : 'table'
   const supabase = await createClient()
 
   const { data: project } = await supabase.from('projects').select('name, code').eq('id', id).single()
@@ -35,7 +37,7 @@ export default async function ProjectWorkPage({
 
   let q = supabase
     .from('tickets')
-    .select('id, seq, type, discipline, title, status, priority, due_date, assignee:assignee_id(full_name), building:building_id(name), floor:floor_id(name), room:room_id(name)')
+    .select('id, seq, type, discipline, title, status, priority, due_date, start_date, assignee:assignee_id(full_name), building:building_id(name), floor:floor_id(name), room:room_id(name)')
     .eq('project_id', id)
     .order('seq', { ascending: false })
   if (sp.status && view === 'table') q = q.eq('status', sp.status as never)
@@ -87,11 +89,10 @@ export default async function ProjectWorkPage({
             <ViewSwitcher />
           </div>
         </div>
-        {view === 'kanban' ? (
-          <KanbanBoard tickets={(tickets as never) ?? []} />
-        ) : (
-          <TicketList tickets={(tickets as never) ?? []} />
-        )}
+        {view === 'kanban' && <KanbanBoard tickets={(tickets as never) ?? []} />}
+        {view === 'calendar' && <CalendarView tickets={(tickets as never) ?? []} />}
+        {view === 'timeline' && <TimelineView tickets={(tickets as never) ?? []} />}
+        {view === 'table' && <TicketList tickets={(tickets as never) ?? []} />}
         <TicketDrawer />
       </div>
     </main>

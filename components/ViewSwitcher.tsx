@@ -1,13 +1,14 @@
 'use client'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-const VIEWS = ['table', 'kanban'] as const
+const VIEWS = ['table', 'kanban', 'calendar', 'timeline'] as const
 
 export function ViewSwitcher() {
   const router = useRouter()
   const pathname = usePathname()
   const params = useSearchParams()
-  const active = params.get('view') === 'kanban' ? 'kanban' : 'table'
+  const raw = params.get('view')
+  const active = (VIEWS as readonly string[]).includes(raw ?? '') ? raw : 'table'
 
   function set(view: string) {
     const p = new URLSearchParams(params.toString())

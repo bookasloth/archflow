@@ -63,6 +63,7 @@ export async function createTicket(formData: FormData) {
     discipline: String(formData.get('discipline')) as never,
     title,
     priority: (String(formData.get('priority')) || 'medium') as never,
+    start_date: opt('start_date'),
     due_date: opt('due_date'),
     drawing_id: opt('drawing_id'),
     drawing_revision_id: opt('drawing_revision_id'),
