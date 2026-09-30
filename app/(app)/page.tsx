@@ -15,18 +15,20 @@ function greeting(): string {
 export default async function Home() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: me } = await supabase.from('profiles').select('full_name').eq('id', user?.id ?? '').maybeSingle()
+  // ponytail: once we have the user, the 4 dependent/independent reads run together (1 round-trip wall-time, not 4 serial).
+  const [{ data: me }, { data: projects }, { data: tickets }, { data: mine }] = await Promise.all([
+    supabase.from('profiles').select('full_name').eq('id', user?.id ?? '').maybeSingle(),
+    supabase.from('projects').select('id, name, code').order('created_at'),
+    supabase.from('tickets').select('project_id, type, status, priority, due_date'),
+    supabase
+      .from('tickets')
+      .select('id, seq, type, title, status, project_id, due_date')
+      .eq('assignee_id', user?.id ?? '')
+      .in('status', ['open', 'in_progress'])
+      .order('due_date', { ascending: true, nullsFirst: false })
+      .limit(6),
+  ])
   const firstName = (me?.full_name ?? '').split(' ')[0]
-
-  const { data: projects } = await supabase.from('projects').select('id, name, code').order('created_at')
-  const { data: tickets } = await supabase.from('tickets').select('project_id, type, status, priority, due_date')
-  const { data: mine } = await supabase
-    .from('tickets')
-    .select('id, seq, type, title, status, project_id, due_date')
-    .eq('assignee_id', user?.id ?? '')
-    .in('status', ['open', 'in_progress'])
-    .order('due_date', { ascending: true, nullsFirst: false })
-    .limit(6)
 
   const today = new Date()
   const iso = today.toISOString().slice(0, 10)

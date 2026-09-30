@@ -15,25 +15,25 @@ export default async function ProjectOverviewPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: project } = await supabase.from('projects').select('name, code').eq('id', id).single()
   const { data: { user } } = await supabase.auth.getUser()
-  const { data: favRow } = await supabase.from('favorites').select('entity_id')
-    .match({ user_id: user?.id ?? '', entity_type: 'project', entity_id: id }).maybeSingle()
+  // ponytail: 5 reads in parallel once we have the user (favRow needs user.id) — 1 round-trip, not 5 serial.
+  const [{ data: project }, { data: favRow }, { data: tickets }, { data: pendingRevs }, { data: proposedMats }] =
+    await Promise.all([
+      supabase.from('projects').select('name, code').eq('id', id).single(),
+      supabase
+        .from('favorites')
+        .select('entity_id')
+        .match({ user_id: user?.id ?? '', entity_type: 'project', entity_id: id })
+        .maybeSingle(),
+      supabase.from('tickets').select('type, status, priority, due_date').eq('project_id', id),
+      supabase
+        .from('drawing_revisions')
+        .select('id, drawings!inner(project_id)')
+        .eq('status', 'under_review')
+        .eq('drawings.project_id', id),
+      supabase.from('materials').select('id').eq('project_id', id).eq('status', 'proposed'),
+    ])
   const isFav = !!favRow
-  const { data: tickets } = await supabase
-    .from('tickets')
-    .select('type, status, priority, due_date')
-    .eq('project_id', id)
-  const { data: pendingRevs } = await supabase
-    .from('drawing_revisions')
-    .select('id, drawings!inner(project_id)')
-    .eq('status', 'under_review')
-    .eq('drawings.project_id', id)
-  const { data: proposedMats } = await supabase
-    .from('materials')
-    .select('id')
-    .eq('project_id', id)
-    .eq('status', 'proposed')
 
   const today = new Date()
   const iso = today.toISOString().slice(0, 10)
