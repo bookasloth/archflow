@@ -84,3 +84,38 @@ export async function signedDrawingUrl(path: string): Promise<string> {
   const { data } = await supabase.storage.from('drawing-files').createSignedUrl(path, 3600)
   return data?.signedUrl ?? ''
 }
+
+// Lightweight detail for the drawing side-drawer (no signed file URL — the drawer
+// is a quick glance; the full drawing page loads the preview).
+export async function getDrawingDetail(id: string) {
+  const supabase = await createClient()
+  const { data: d } = await supabase
+    .from('drawings')
+    .select('id, title, drawing_number, discipline, project_id')
+    .eq('id', id)
+    .single()
+  if (!d) return null
+
+  const { data: revRows } = await supabase
+    .from('drawing_revisions')
+    .select('id, revision_no, status, created_at, profiles:uploaded_by(full_name)')
+    .eq('drawing_id', id)
+    .order('revision_no', { ascending: false })
+  type RevRow = {
+    id: string; revision_no: number; status: RevisionStatus; created_at: string
+    profiles: { full_name: string | null } | null
+  }
+  const revisions = ((revRows as unknown as RevRow[]) ?? []).map((r) => ({
+    id: r.id, revision_no: r.revision_no, status: r.status,
+    created_at: r.created_at, uploader: r.profiles?.full_name ?? null,
+  }))
+
+  const { data: linked } = await supabase
+    .from('tickets')
+    .select('id, seq, type, title')
+    .eq('drawing_id', id)
+    .order('seq', { ascending: false })
+  const linkedTickets = (linked as { id: string; seq: number; type: string; title: string }[]) ?? []
+
+  return { ...d, revisions, linkedTickets }
+}
