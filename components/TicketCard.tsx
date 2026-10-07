@@ -18,11 +18,13 @@ export type CardTicket = {
 
 export function TicketCard({
   ticket,
+  isDragging = false,
   onOpen,
   onDragStart,
   onDragEnd,
 }: {
   ticket: CardTicket
+  isDragging?: boolean
   onOpen: (id: string) => void
   onDragStart: (t: CardTicket) => void
   onDragEnd: () => void
@@ -45,7 +47,7 @@ export function TicketCard({
       }}
       role="button"
       tabIndex={0}
-      className="cursor-pointer space-y-1 rounded border bg-white p-2 text-sm shadow-sm hover:border-gray-400"
+      className={`cursor-grab space-y-1 rounded-lg border border-subtle bg-surface p-2 text-sm shadow-sm hover:border-line active:cursor-grabbing ${isDragging ? 'opacity-50' : ''}`}
     >
       <div className="flex items-center justify-between">
         <span className="font-mono text-xs text-ink-muted">
@@ -59,7 +61,7 @@ export function TicketCard({
         {ticket.due_date && <span>due {ticket.due_date}</span>}
       </div>
       {ticket.assignee?.full_name && (
-        <div className="text-xs text-gray-600">{ticket.assignee.full_name}</div>
+        <div className="text-xs text-ink-muted">{ticket.assignee.full_name}</div>
       )}
     </div>
   )

@@ -110,10 +110,6 @@ export async function changeStatus(
   return { ok: true }
 }
 
-export async function changeStatusForm(formData: FormData): Promise<void> {
-  await changeStatus(formData)
-}
-
 export async function addComment(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -126,30 +122,27 @@ export async function addComment(formData: FormData) {
 
 export async function getTicketDetail(id: string) {
   const supabase = await createClient()
-  const { data: t } = await supabase
-    .from('tickets')
-    .select('id, seq, type, discipline, title, description, status, priority, due_date, start_date, project_id, drawing_id, drawing:drawing_id(drawing_number, title), material_id, material:material_id(name), parent_id, parent:parent_id(seq, type, title)')
-    .eq('id', id)
-    .single()
+  // One parallel batch: every query keys off the ticket id (was 6 sequential round trips).
+  const [{ data: t }, { data: subtaskRows }, { data: tagRows }, { data: allTagRows }, { data: atts }, { data: comments }] =
+    await Promise.all([
+      supabase
+        .from('tickets')
+        .select('id, seq, type, discipline, title, description, status, priority, due_date, start_date, project_id, drawing_id, drawing:drawing_id(drawing_number, title), material_id, material:material_id(name), parent_id, parent:parent_id(seq, type, title)')
+        .eq('id', id)
+        .single(),
+      supabase.from('tickets').select('id, seq, type, title, status').eq('parent_id', id).order('seq', { ascending: false }),
+      supabase.from('ticket_tags').select('tag_id, tags(id, name, color)').eq('ticket_id', id),
+      supabase.from('tags').select('id, name, color').order('name'),
+      supabase.from('attachments').select('id, storage_path, kind, issue_markers(x, y, label)').eq('ticket_id', id),
+      supabase.from('comments').select('id, body, created_at, profiles(full_name)').eq('ticket_id', id).order('created_at'),
+    ])
   if (!t) return null
 
-  const { data: subtaskRows } = await supabase
-    .from('tickets').select('id, seq, type, title, status')
-    .eq('parent_id', id).order('seq', { ascending: false })
   const subtasks = (subtaskRows as { id: string; seq: number; type: string; title: string; status: string }[]) ?? []
-
-  const { data: tagRows } = await supabase
-    .from('ticket_tags').select('tag_id, tags(id, name, color)').eq('ticket_id', id)
   type TagJoin = { tags: { id: string; name: string; color: string | null } | null }
   const tags = ((tagRows as unknown as TagJoin[]) ?? []).map((r) => r.tags).filter(Boolean) as { id: string; name: string; color: string | null }[]
-
-  const { data: allTagRows } = await supabase.from('tags').select('id, name, color').order('name')
   const allTags = (allTagRows as { id: string; name: string; color: string | null }[]) ?? []
 
-  const { data: atts } = await supabase
-    .from('attachments')
-    .select('id, storage_path, kind, issue_markers(x, y, label)')
-    .eq('ticket_id', id)
   type AttRow = {
     storage_path: string
     kind: string
@@ -163,11 +156,6 @@ export async function getTicketDetail(id: string) {
     })),
   )
 
-  const { data: comments } = await supabase
-    .from('comments')
-    .select('id, body, created_at, profiles(full_name)')
-    .eq('ticket_id', id)
-    .order('created_at')
   type CmtRow = {
     id: string; body: string; created_at: string
     profiles: { full_name: string | null } | null

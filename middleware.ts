@@ -6,5 +6,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webmanifest)$).*)'],
+  // sb/ = Supabase proxy (rewrite): must not hit the auth gate, or login itself would redirect.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|sb/|.*\\.(?:svg|png|jpg|jpeg|webmanifest)$).*)'],
 }

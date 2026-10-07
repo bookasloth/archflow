@@ -28,14 +28,6 @@ export default async function ProjectWorkPage({
   const view = ['kanban', 'calendar', 'timeline'].includes(sp.view ?? '') ? sp.view! : 'table'
   const supabase = await createClient()
 
-  const { data: project } = await supabase.from('projects').select('name, code').eq('id', id).single()
-  const { data: buildings } = await supabase
-    .from('buildings')
-    .select('id, name, floors(id, name, rooms(id, name))')
-    .eq('project_id', id)
-  const { data: profiles } = await supabase.from('profiles').select('id, full_name').order('full_name')
-  const { data: { user } } = await supabase.auth.getUser()
-
   let q = supabase
     .from('tickets')
     .select('id, seq, type, discipline, title, status, priority, due_date, start_date, assignee:assignee_id(full_name), building:building_id(name), floor:floor_id(name), room:room_id(name)')
@@ -49,12 +41,20 @@ export default async function ProjectWorkPage({
   if (sp.floor) q = q.eq('floor_id', sp.floor)
   if (sp.room) q = q.eq('room_id', sp.room)
   if (sp.q) q = q.ilike('title', `%${sp.q}%`)
-  const { data: tickets } = await q
 
-  const { data: drawingRows } = await supabase
-    .from('drawings')
-    .select('id, title, drawing_revisions(id, revision_no)')
-    .eq('project_id', id)
+  // One parallel batch (was 7 sequential round trips per render).
+  const [
+    { data: project }, { data: buildings }, { data: profiles }, { data: { user } },
+    { data: tickets }, { data: drawingRows }, { data: materialRows },
+  ] = await Promise.all([
+    supabase.from('projects').select('name, code').eq('id', id).single(),
+    supabase.from('buildings').select('id, name, floors(id, name, rooms(id, name))').eq('project_id', id),
+    supabase.from('profiles').select('id, full_name').order('full_name'),
+    supabase.auth.getUser(),
+    q,
+    supabase.from('drawings').select('id, title, drawing_revisions(id, revision_no)').eq('project_id', id),
+    supabase.from('materials').select('id, name').eq('project_id', id).order('name'),
+  ])
   type DR = { id: string; title: string; drawing_revisions: { id: string; revision_no: number }[] }
   const revisionOptions: RevisionOption[] = ((drawingRows as unknown as DR[]) ?? []).flatMap((d) =>
     (d.drawing_revisions ?? []).map((r) => ({
@@ -62,11 +62,6 @@ export default async function ProjectWorkPage({
     })),
   )
 
-  const { data: materialRows } = await supabase
-    .from('materials')
-    .select('id, name')
-    .eq('project_id', id)
-    .order('name')
   const materials = ((materialRows as { id: string; name: string }[]) ?? [])
     .map((m) => ({ id: m.id, label: m.name }))
 

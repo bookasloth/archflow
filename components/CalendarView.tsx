@@ -1,5 +1,6 @@
 'use client'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { setSearchParams } from '@/lib/url-state'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { STATUS_COLOR } from '@/lib/ticket-colors'
 import type { TicketStatus } from '@/lib/status'
@@ -19,7 +20,7 @@ function monthParam(sp: URLSearchParams): { y: number; m: number } {
 }
 
 export function CalendarView({ tickets }: { tickets: CalTicket[] }) {
-  const router = useRouter(); const pathname = usePathname(); const params = useSearchParams()
+  const params = useSearchParams()
   const { y, m } = monthParam(params)
 
   // Anchor date = due_date, else start_date.
@@ -41,14 +42,9 @@ export function CalendarView({ tickets }: { tickets: CalTicket[] }) {
 
   function go(deltaMonths: number) {
     const nd = new Date(Date.UTC(y, m + deltaMonths, 1))
-    const p = new URLSearchParams(params.toString())
-    p.set('month', `${nd.getUTCFullYear()}-${String(nd.getUTCMonth() + 1).padStart(2, '0')}`)
-    router.replace(`${pathname}?${p.toString()}`)
+    setSearchParams({ month: `${nd.getUTCFullYear()}-${String(nd.getUTCMonth() + 1).padStart(2, '0')}` })
   }
-  function open(id: string) {
-    const p = new URLSearchParams(params.toString()); p.set('ticket', id)
-    router.replace(`${pathname}?${p.toString()}`)
-  }
+  const open = (id: string) => setSearchParams({ ticket: id })
 
   const label = first.toLocaleString('en', { month: 'long', year: 'numeric', timeZone: 'UTC' })
   const todayIso = iso(new Date())

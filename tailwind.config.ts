@@ -69,6 +69,8 @@ export default {
       },
       borderRadius: { DEFAULT: 'var(--radius)', lg: 'var(--radius-lg)' },
       boxShadow: { sm: 'var(--shadow-sm)' },
+      keyframes: { 'drawer-in': { from: { transform: 'translateX(100%)' }, to: { transform: 'translateX(0)' } } },
+      animation: { 'drawer-in': 'drawer-in 160ms ease-out' },
       borderColor: { DEFAULT: 'var(--border-line)' },
     },
   },

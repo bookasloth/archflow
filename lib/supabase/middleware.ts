@@ -19,7 +19,11 @@ export async function updateSession(request: NextRequest) {
     },
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // getClaims verifies the JWT locally against the project's cached ES256 JWKS — no
+  // network hop on every request (getUser was a round trip to Supabase per navigation,
+  // prefetch and server action). It still refreshes an expired session.
+  const { data } = await supabase.auth.getClaims()
+  const user = data?.claims
   const path = request.nextUrl.pathname
   const isPublic = path.startsWith('/login') || path.startsWith('/auth')
   if (!user && !isPublic) {

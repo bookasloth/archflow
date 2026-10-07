@@ -17,12 +17,14 @@ export default async function DrawingsPage({ params, searchParams }: { params: P
   const { id } = await params
   const sp = await searchParams
   const supabase = await createClient()
-  const { data: project } = await supabase.from('projects').select('name').eq('id', id).single()
-  const { data: rows } = await supabase
-    .from('drawings')
-    .select('id, drawing_number, title, discipline, drawing_revisions(id, revision_no, status)')
-    .eq('project_id', id)
-    .order('created_at')
+  const [{ data: project }, { data: rows }] = await Promise.all([
+    supabase.from('projects').select('name').eq('id', id).single(),
+    supabase
+      .from('drawings')
+      .select('id, drawing_number, title, discipline, drawing_revisions(id, revision_no, status)')
+      .eq('project_id', id)
+      .order('created_at'),
+  ])
 
   const drawings = ((rows as unknown as DrawingRow[]) ?? []).map((d) => {
     const latest = [...(d.drawing_revisions ?? [])].sort((a, b) => b.revision_no - a.revision_no)[0]
