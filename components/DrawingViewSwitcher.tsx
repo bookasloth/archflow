@@ -1,4 +1,5 @@
 'use client'
+import { useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 // Drawings support two views (no calendar/timeline like tickets).
@@ -8,6 +9,8 @@ export function DrawingViewSwitcher() {
   const router = useRouter()
   const pathname = usePathname()
   const params = useSearchParams()
+  // The view is rendered server-side, so switching is a round trip: show it's working.
+  const [pending, startTransition] = useTransition()
   const raw = params.get('view')
   const active = (VIEWS as readonly string[]).includes(raw ?? '') ? raw : 'table'
 
@@ -15,11 +18,16 @@ export function DrawingViewSwitcher() {
     const p = new URLSearchParams(params.toString())
     if (view === 'table') p.delete('view')
     else p.set('view', view)
-    router.replace(`${pathname}?${p.toString()}`)
+    startTransition(() => router.replace(`${pathname}?${p.toString()}`))
   }
 
   return (
-    <div className="inline-flex rounded border border-subtle text-sm" role="tablist" aria-label="View">
+    <div
+      className={`inline-flex rounded border border-subtle text-sm transition-opacity ${pending ? 'opacity-60' : ''}`}
+      role="tablist"
+      aria-label="View"
+      aria-busy={pending}
+    >
       {VIEWS.map((v) => (
         <button
           key={v}

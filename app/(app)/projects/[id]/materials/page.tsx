@@ -20,24 +20,6 @@ export default async function MaterialsPage({
   const sp = await searchParams
   const supabase = await createClient()
 
-  const { data: project } = await supabase.from('projects').select('name').eq('id', id).single()
-
-  const { data: buildingTree } = await supabase
-    .from('buildings')
-    .select('floors(rooms(id, name))')
-    .eq('project_id', id)
-  const rooms: RoomOption[] = ((buildingTree as unknown as BuildingTree[]) ?? [])
-    .flatMap((b) => b.floors ?? [])
-    .flatMap((f) => f.rooms ?? [])
-
-  const { data: drawingRows } = await supabase
-    .from('drawings')
-    .select('id, drawing_number, title')
-    .eq('project_id', id)
-    .order('drawing_number')
-  const drawings: DrawingOption[] = ((drawingRows as { id: string; drawing_number: string | null; title: string }[]) ?? [])
-    .map((d) => ({ id: d.id, label: d.drawing_number ? `${d.drawing_number} — ${d.title}` : d.title }))
-
   let q = supabase
     .from('materials')
     .select('id, name, manufacturer, category, status, rooms(name)')
@@ -45,7 +27,19 @@ export default async function MaterialsPage({
     .order('created_at', { ascending: false })
   if (sp.status) q = q.eq('status', sp.status as never)
   if (sp.category) q = q.eq('category', sp.category as never)
-  const { data: rows } = await q
+
+  const [{ data: project }, { data: buildingTree }, { data: drawingRows }, { data: rows }] = await Promise.all([
+    supabase.from('projects').select('name').eq('id', id).single(),
+    supabase.from('buildings').select('floors(rooms(id, name))').eq('project_id', id),
+    supabase.from('drawings').select('id, drawing_number, title').eq('project_id', id).order('drawing_number'),
+    q,
+  ])
+  const rooms: RoomOption[] = ((buildingTree as unknown as BuildingTree[]) ?? [])
+    .flatMap((b) => b.floors ?? [])
+    .flatMap((f) => f.rooms ?? [])
+
+  const drawings: DrawingOption[] = ((drawingRows as { id: string; drawing_number: string | null; title: string }[]) ?? [])
+    .map((d) => ({ id: d.id, label: d.drawing_number ? `${d.drawing_number} — ${d.title}` : d.title }))
 
   const materials = ((rows as unknown as MaterialRow[]) ?? []).map((m) => ({
     id: m.id, name: m.name, manufacturer: m.manufacturer, category: m.category,

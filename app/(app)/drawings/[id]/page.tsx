@@ -22,35 +22,25 @@ export default async function DrawingPage({ params }: { params: Promise<{ id: st
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: d } = await supabase
-    .from('drawings')
-    .select('id, title, drawing_number, discipline, project_id')
-    .eq('id', id)
-    .single()
+  const [{ data: d }, { data: revRows }, { data: linked }, { data: linkedMat }] = await Promise.all([
+    supabase.from('drawings').select('id, title, drawing_number, discipline, project_id').eq('id', id).single(),
+    supabase
+      .from('drawing_revisions')
+      .select('id, revision_no, status, storage_path, created_at, profiles:uploaded_by(full_name)')
+      .eq('drawing_id', id)
+      .order('revision_no', { ascending: false }),
+    supabase.from('tickets').select('id, seq, type, title').eq('drawing_id', id).order('seq', { ascending: false }),
+    supabase.from('materials').select('id, name, category').eq('drawing_id', id).order('created_at', { ascending: false }),
+  ])
   if (!d) notFound()
 
-  const { data: revRows } = await supabase
-    .from('drawing_revisions')
-    .select('id, revision_no, status, storage_path, created_at, profiles:uploaded_by(full_name)')
-    .eq('drawing_id', id)
-    .order('revision_no', { ascending: false })
   const revisions = (revRows as unknown as RevRow[]) ?? []
   const latest = revisions[0]
   const previewUrl = latest ? await signedDrawingUrl(latest.storage_path) : ''
 
-  const { data: linked } = await supabase
-    .from('tickets')
-    .select('id, seq, type, title')
-    .eq('drawing_id', id)
-    .order('seq', { ascending: false })
   type LT = { id: string; seq: number; type: string; title: string }
   const linkedTickets = (linked as LT[]) ?? []
 
-  const { data: linkedMat } = await supabase
-    .from('materials')
-    .select('id, name, category')
-    .eq('drawing_id', id)
-    .order('created_at', { ascending: false })
   type LM = { id: string; name: string; category: string }
   const linkedMaterials = (linkedMat as LM[]) ?? []
 

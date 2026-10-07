@@ -1,5 +1,6 @@
 'use client'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { setSearchParams } from '@/lib/url-state'
 import { Popover } from '@/components/ui/Popover'
 
 // Column keys mirror the TicketList columns (Ticket is always shown).
@@ -39,8 +40,6 @@ function Row({ active, onClick, children }: { active: boolean; onClick: () => vo
 }
 
 export function ViewControls() {
-  const router = useRouter()
-  const pathname = usePathname()
   const params = useSearchParams()
 
   const sort = params.get('sort') ?? ''            // "field:dir"
@@ -48,11 +47,8 @@ export function ViewControls() {
   const group = params.get('group') ?? ''
   const hidden = new Set((params.get('hide') ?? '').split(',').filter(Boolean))
 
-  function setParam(key: string, value: string) {
-    const p = new URLSearchParams(params.toString())
-    if (value) p.set(key, value); else p.delete(key)
-    router.replace(`${pathname}?${p.toString()}`)
-  }
+  // sort/group/hide are applied client-side by TicketList — no server round trip.
+  const setParam = (key: string, value: string) => setSearchParams({ [key]: value || null })
   function toggleHidden(key: string) {
     const next = new Set(hidden)
     next.has(key) ? next.delete(key) : next.add(key)

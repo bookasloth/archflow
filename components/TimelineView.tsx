@@ -1,5 +1,5 @@
 'use client'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { setSearchParams } from '@/lib/url-state'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { STATUS_COLOR } from '@/lib/ticket-colors'
 import type { TicketStatus } from '@/lib/status'
@@ -11,8 +11,6 @@ function toUTC(s: string) { return Date.parse(s + 'T00:00:00Z') }
 // Read-only schedule bars: start_date → due_date (single-day bar if only one is set).
 // Drag-to-reschedule is deferred; click a bar to open the ticket.
 export function TimelineView({ tickets }: { tickets: CalTicket[] }) {
-  const router = useRouter(); const pathname = usePathname(); const params = useSearchParams()
-
   const scheduled = tickets
     .map((t) => {
       const s = t.start_date ?? t.due_date
@@ -35,10 +33,7 @@ export function TimelineView({ tickets }: { tickets: CalTicket[] }) {
   const pct = (ms: number) => ((ms - min) / span) * 100
   const fmt = (ms: number) => new Date(ms).toLocaleDateString('en', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 
-  function open(id: string) {
-    const p = new URLSearchParams(params.toString()); p.set('ticket', id)
-    router.replace(`${pathname}?${p.toString()}`)
-  }
+  const open = (id: string) => setSearchParams({ ticket: id })
 
   return (
     <div className="space-y-2">

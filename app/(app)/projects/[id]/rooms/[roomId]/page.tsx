@@ -16,11 +16,21 @@ export default async function RoomPage({
   const { id, roomId } = await params
   const supabase = await createClient()
 
-  const { data: room } = await supabase
-    .from('rooms')
-    .select('id, name, floor_id, floors(name, building_id, buildings(name, project_id))')
-    .eq('id', roomId)
-    .single()
+  const [{ data: room }, { data: tickets }, { data: materials }, { data: profiles }, { data: { user } }] = await Promise.all([
+    supabase
+      .from('rooms')
+      .select('id, name, floor_id, floors(name, building_id, buildings(name, project_id))')
+      .eq('id', roomId)
+      .single(),
+    supabase
+      .from('tickets')
+      .select('id, seq, type, discipline, title, status, priority, due_date, assignee:assignee_id(full_name), building:building_id(name), floor:floor_id(name), room:room_id(name)')
+      .eq('room_id', roomId)
+      .order('seq', { ascending: false }),
+    supabase.from('materials').select('id, name, status, category').eq('room_id', roomId).order('created_at', { ascending: false }),
+    supabase.from('profiles').select('id, full_name').order('full_name'),
+    supabase.auth.getUser(),
+  ])
   if (!room) notFound()
   type RoomCtx = {
     id: string; name: string; floor_id: string
@@ -31,25 +41,13 @@ export default async function RoomPage({
   const buildingName = r.floors?.buildings?.name ?? ''
   const buildingId = r.floors?.building_id
 
-  const { data: tickets } = await supabase
-    .from('tickets')
-    .select('id, seq, type, discipline, title, status, priority, due_date, assignee:assignee_id(full_name), building:building_id(name), floor:floor_id(name), room:room_id(name)')
-    .eq('room_id', roomId)
-    .order('seq', { ascending: false })
   const all = (tickets as never[]) ?? []
   const tasks = all.filter((t: { type: string }) => t.type === 'task')
   const site = all.filter((t: { type: string }) => t.type === 'site_issue')
 
-  const { data: materials } = await supabase
-    .from('materials')
-    .select('id, name, status, category')
-    .eq('room_id', roomId)
-    .order('created_at', { ascending: false })
   type Mat = { id: string; name: string; status: string; category: string }
   const mats = (materials as Mat[]) ?? []
 
-  const { data: profiles } = await supabase.from('profiles').select('id, full_name').order('full_name')
-  const { data: { user } } = await supabase.auth.getUser()
 
   return (
     <div className="max-w-4xl space-y-5">

@@ -1,11 +1,12 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
+import { viaProxy } from '@/lib/supabase/proxy'
 import { revalidatePath } from 'next/cache'
 
 export async function signedUrl(path: string): Promise<string> {
   const supabase = await createClient()
   const { data } = await supabase.storage.from('ticket-media').createSignedUrl(path, 3600)
-  return data?.signedUrl ?? ''
+  return viaProxy(data?.signedUrl ?? '')
 }
 
 export async function saveAttachment(input: {

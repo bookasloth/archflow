@@ -15,7 +15,8 @@ type Rev = {
   created_at: string; uploader: string | null
 }
 
-export function RevisionHistory({ revisions }: { revisions: Rev[] }) {
+// readOnly: the drawing drawer has its own status picker, so it hides the review buttons.
+export function RevisionHistory({ revisions, readOnly = false }: { revisions: Rev[]; readOnly?: boolean }) {
   if (revisions.length === 0) return <p className="text-sm text-ink-muted">No revisions yet.</p>
   return (
     <ul className="divide-y rounded border">
@@ -27,7 +28,7 @@ export function RevisionHistory({ revisions }: { revisions: Rev[] }) {
             <span className="text-xs text-ink-muted">{r.uploader ?? 'someone'}</span>
           </span>
           <span className="flex gap-1">
-            {allowedRevisionTransitions(r.status).map((to) => (
+            {!readOnly && allowedRevisionTransitions(r.status).map((to) => (
               <form key={to} action={reviewRevision}>
                 <input type="hidden" name="revision_id" value={r.id} />
                 <input type="hidden" name="to" value={to} />

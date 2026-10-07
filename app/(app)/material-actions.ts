@@ -1,6 +1,7 @@
 'use server'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { viaProxy } from '@/lib/supabase/proxy'
 import { nextMaterialStatuses, type MaterialStatus } from '@/lib/materials'
 
 export async function createMaterial(formData: FormData) {
@@ -64,5 +65,5 @@ export async function setMaterialStatus(formData: FormData) {
 export async function signedMaterialUrl(path: string): Promise<string> {
   const supabase = await createClient()
   const { data } = await supabase.storage.from('material-files').createSignedUrl(path, 3600)
-  return data?.signedUrl ?? ''
+  return viaProxy(data?.signedUrl ?? '')
 }

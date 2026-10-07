@@ -1,6 +1,7 @@
 'use client'
 import { useTransition } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
+import { setSearchParams } from '@/lib/url-state'
 import { StatusBadge, PriorityBadge, DisciplineBadge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { applySort, groupBy, type SortSpec } from '@/lib/view'
@@ -28,8 +29,6 @@ const GROUP_LABEL: Record<string, (v: string) => string> = {
 }
 
 export function TicketList({ tickets }: { tickets: Row[] }) {
-  const router = useRouter()
-  const pathname = usePathname()
   const params = useSearchParams()
   const [, startTransition] = useTransition()
 
@@ -41,18 +40,14 @@ export function TicketList({ tickets }: { tickets: Row[] }) {
 
   const sorted = applySort(tickets as unknown as Record<string, unknown>[], sort) as unknown as Row[]
 
-  function open(id: string) {
-    const p = new URLSearchParams(params.toString())
-    p.set('ticket', id)
-    router.replace(`${pathname}?${p.toString()}`)
-  }
+  const open = (id: string) => setSearchParams({ ticket: id })
   function setStatus(t: Row, to: string) {
     if (to === t.status) return
     startTransition(async () => {
       const fd = new FormData()
       fd.set('ticket_id', t.id); fd.set('to', to)
-      const res = await changeStatus(fd)
-      if (res.ok) router.refresh()
+      // changeStatus revalidates the project, so fresh rows arrive with the response.
+      await changeStatus(fd)
     })
   }
 

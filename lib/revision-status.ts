@@ -2,6 +2,11 @@ export type RevisionStatus =
   | 'draft' | 'under_review' | 'approved' | 'approved_with_comments'
   | 'changes_requested' | 'rejected' | 'superseded'
 
+// Workflow order — Kanban columns and the drawer's status picker.
+export const REVISION_ORDER: RevisionStatus[] = [
+  'draft', 'under_review', 'changes_requested', 'approved', 'approved_with_comments', 'rejected', 'superseded',
+]
+
 const TRANSITIONS: Record<RevisionStatus, RevisionStatus[]> = {
   draft: ['under_review'],
   under_review: ['approved', 'approved_with_comments', 'changes_requested', 'rejected'],
