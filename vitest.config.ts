@@ -6,6 +6,8 @@ export default defineConfig({
     // Map the "@/..." import alias so tests resolve lib modules like the app does.
     alias: { '@': fileURLToPath(new URL('./', import.meta.url)) },
   },
+  // TSX in tests (the invoice PDF component) uses React's automatic JSX runtime, like Next.
+  esbuild: { jsx: 'automatic' },
   test: {
     environment: 'node',
     include: ['tests/**/*.test.ts'],
