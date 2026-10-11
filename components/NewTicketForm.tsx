@@ -1,4 +1,5 @@
 'use client'
+import { useFormStatus } from 'react-dom'
 import { createTicket } from '@/app/(app)/actions'
 import { DrawingRevisionSelect, type RevisionOption } from '@/components/DrawingRevisionSelect'
 
@@ -45,7 +46,17 @@ export function NewTicketForm({ projectId, revisionOptions = [], materials = [],
           {materials.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
         </select>
       )}
-      <button className="rounded bg-primary px-3 hover:bg-primary-hover text-white">Add</button>
+      <AddButton />
     </form>
+  )
+}
+
+// Instant feedback while the ticket saves; also blocks double-submits.
+function AddButton() {
+  const { pending } = useFormStatus()
+  return (
+    <button disabled={pending} className="rounded bg-primary px-3 text-white hover:bg-primary-hover disabled:opacity-60">
+      {pending ? 'Adding…' : 'Add'}
+    </button>
   )
 }

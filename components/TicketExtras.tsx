@@ -15,7 +15,7 @@ export function TicketExtras({
   ticketId: string; projectId: string; discipline: string
   parentId: string | null; parent: { seq: number; type: string; title: string } | null
   tags: Tag[]; allTags: Tag[]; subtasks: Subtask[]
-  onChanged: () => void; onOpenTicket: (id: string) => void
+  onChanged: () => void | Promise<void>; onOpenTicket: (id: string) => void
 }) {
   const [, start] = useTransition()
   const [newSub, setNewSub] = useState('')
@@ -23,18 +23,18 @@ export function TicketExtras({
   const applied = new Set(tags.map((t) => t.id))
   const available = allTags.filter((t) => !applied.has(t.id))
 
-  function addTag(id: string) { start(async () => { await addTicketTag(ticketId, id); onChanged() }) }
-  function removeTag(id: string) { start(async () => { await removeTicketTag(ticketId, id); onChanged() }) }
+  function addTag(id: string) { start(async () => { await addTicketTag(ticketId, id); await onChanged() }) }
+  function removeTag(id: string) { start(async () => { await removeTicketTag(ticketId, id); await onChanged() }) }
   function makeTag() {
     const n = newTag.trim(); if (!n) return
-    start(async () => { const id = await createTag(n); if (id) await addTicketTag(ticketId, id); setNewTag(''); onChanged() })
+    start(async () => { const id = await createTag(n); if (id) await addTicketTag(ticketId, id); setNewTag(''); await onChanged() })
   }
   function addSub() {
     const title = newSub.trim(); if (!title) return
     const fd = new FormData()
     fd.set('project_id', projectId); fd.set('title', title); fd.set('parent_id', ticketId)
     fd.set('discipline', discipline); fd.set('type', 'task'); fd.set('priority', 'medium')
-    start(async () => { await createTicket(fd); setNewSub(''); onChanged() })
+    start(async () => { await createTicket(fd); setNewSub(''); await onChanged() })
   }
 
   return (

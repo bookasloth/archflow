@@ -6,8 +6,11 @@ import { columnsFor } from '@/lib/kanban-columns'
 import { STATUS_COLOR } from '@/lib/ticket-colors'
 import { statusLabel } from '@/lib/labels'
 import { setSearchParams } from '@/lib/url-state'
+import { prefetchOnHover } from '@/lib/detail-store'
+import { kanbanScrollerRef, touchDrag } from '@/lib/touch-drag'
 import { TicketCard, type CardTicket } from '@/components/TicketCard'
 import { KanbanColumn } from '@/components/ui/KanbanColumn'
+import { openTicket, ticketStore } from '@/components/TicketDrawer'
 import { changeStatus } from '@/app/(app)/actions'
 
 const TYPES: { key: TicketType; label: string }[] = [
@@ -80,7 +83,7 @@ export function KanbanBoard({ tickets }: { tickets: CardTicket[] }) {
         </span>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto pb-2">
+      <div ref={kanbanScrollerRef} className="flex gap-3 overflow-x-auto pb-2">
         {columns.map((status) => {
           const cards = shown.filter((t) => t.status === status)
           const isTarget = dragging != null && legalTargets.includes(status)
@@ -91,6 +94,7 @@ export function KanbanBoard({ tickets }: { tickets: CardTicket[] }) {
               label={statusLabel(status)}
               count={cards.length}
               dotClass={STATUS_COLOR[status]}
+              dropStatus={status}
               state={isTarget ? 'target' : isBlocked ? 'blocked' : 'idle'}
               onDragOver={(e) => {
                 if (!isTarget) return
@@ -113,7 +117,17 @@ export function KanbanBoard({ tickets }: { tickets: CardTicket[] }) {
                     key={t.id}
                     ticket={t}
                     isDragging={dragging?.id === t.id}
-                    onOpen={(id) => setSearchParams({ ticket: id })}
+                    onOpen={() => openTicket(t)}
+                    bind={{
+                      ...prefetchOnHover(() => ticketStore.prefetch(t.id)),
+                      ...touchDrag(t, {
+                        onStart: setDragging,
+                        onEnd: (card, to) => {
+                          setDragging(null)
+                          if (to) move(card, to as TicketStatus)
+                        },
+                      }),
+                    }}
                     onDragStart={setDragging}
                     onDragEnd={() => setDragging(null)}
                   />

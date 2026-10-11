@@ -2,7 +2,9 @@
 import { useOptimistic, useState, useTransition } from 'react'
 import { REVISION_ORDER, formatRevision, type RevisionStatus } from '@/lib/revision-status'
 import { revisionLabel, disciplineLabel, type Discipline } from '@/lib/labels'
-import { setSearchParams } from '@/lib/url-state'
+import { prefetchOnHover } from '@/lib/detail-store'
+import { clickSuppressed, kanbanScrollerRef, touchDrag } from '@/lib/touch-drag'
+import { openDrawing, drawingStore } from '@/components/DrawingDrawer'
 import { RevisionBadge } from '@/components/ui/Badge'
 import { KanbanColumn as Column } from '@/components/ui/KanbanColumn'
 import { setRevisionStatus } from '@/app/(app)/drawing-actions'
@@ -66,7 +68,6 @@ export function DrawingKanban({ drawings }: { drawings: KanbanDrawing[] }) {
     })
   }
 
-  const openDrawer = (id: string) => setSearchParams({ drawing: id })
   const noRevision = optDrawings.filter((d) => !d.latestStatus)
 
   return (
@@ -74,11 +75,11 @@ export function DrawingKanban({ drawings }: { drawings: KanbanDrawing[] }) {
       <p className="text-xs text-ink-faint" aria-live="polite">
         {error ? <span className="text-danger">{error}</span> : 'Drag a card to any column, or open it to change status.'}
       </p>
-      <div className="flex gap-3 overflow-x-auto pb-2">
+      <div ref={kanbanScrollerRef} className="flex gap-3 overflow-x-auto pb-2">
         {noRevision.length > 0 && (
           <Column label="No revision" count={noRevision.length} dotClass="bg-ink-faint" state="idle">
             {noRevision.map((d) => (
-              <Card key={d.id} d={d} draggable={false} onOpen={() => openDrawer(d.id)} />
+              <Card key={d.id} d={d} draggable={false} onOpen={() => openDrawing(d)} />
             ))}
           </Column>
         )}
@@ -91,6 +92,7 @@ export function DrawingKanban({ drawings }: { drawings: KanbanDrawing[] }) {
               label={revisionLabel(status)}
               count={cards.length}
               dotClass={HEADER_DOT[status]}
+              dropStatus={status}
               state={isTarget ? 'target' : 'idle'}
               onDragOver={(e) => {
                 if (!isTarget) return
@@ -116,7 +118,14 @@ export function DrawingKanban({ drawings }: { drawings: KanbanDrawing[] }) {
                     isDragging={dragging?.id === d.id}
                     onDragStart={() => setDragging(d)}
                     onDragEnd={() => setDragging(null)}
-                    onOpen={() => openDrawer(d.id)}
+                    onOpen={() => openDrawing(d)}
+                    bind={touchDrag(d, {
+                      onStart: setDragging,
+                      onEnd: (card, to) => {
+                        setDragging(null)
+                        if (to) move(card, to as RevisionStatus)
+                      },
+                    })}
                   />
                 ))
               )}
@@ -135,6 +144,7 @@ function Card({
   onOpen,
   onDragStart,
   onDragEnd,
+  bind,
 }: {
   d: KanbanDrawing
   draggable: boolean
@@ -142,9 +152,12 @@ function Card({
   onOpen: () => void
   onDragStart?: () => void
   onDragEnd?: () => void
+  bind?: React.HTMLAttributes<HTMLDivElement> // touch-drag handlers
 }) {
   return (
     <div
+      {...(draggable ? bind : undefined)}
+      {...prefetchOnHover(() => drawingStore.prefetch(d.id))}
       draggable={draggable}
       onDragStart={(e) => {
         // Without setData, Firefox never starts an HTML5 drag.
@@ -153,7 +166,7 @@ function Card({
         onDragStart?.()
       }}
       onDragEnd={onDragEnd}
-      onClick={onOpen}
+      onClick={() => !clickSuppressed() && onOpen()}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -162,7 +175,7 @@ function Card({
           onOpen()
         }
       }}
-      className={`space-y-1 rounded-lg border border-subtle bg-surface p-2 text-sm shadow-sm ${
+      className={`select-none space-y-1 rounded-lg border [-webkit-touch-callout:none] border-subtle bg-surface p-2 text-sm shadow-sm ${
         draggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
       } ${isDragging ? 'opacity-50' : ''} hover:border-line`}
     >

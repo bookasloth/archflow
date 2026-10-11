@@ -1,6 +1,7 @@
 'use client'
 import { useSearchParams } from 'next/navigation'
 import { setSearchParams } from '@/lib/url-state'
+import { openTicket } from '@/components/TicketDrawer'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { STATUS_COLOR } from '@/lib/ticket-colors'
 import type { TicketStatus } from '@/lib/status'
@@ -44,7 +45,10 @@ export function CalendarView({ tickets }: { tickets: CalTicket[] }) {
     const nd = new Date(Date.UTC(y, m + deltaMonths, 1))
     setSearchParams({ month: `${nd.getUTCFullYear()}-${String(nd.getUTCMonth() + 1).padStart(2, '0')}` })
   }
-  const open = (id: string) => setSearchParams({ ticket: id })
+  const open = (id: string) => {
+    const t = tickets.find((x) => x.id === id)
+    if (t) openTicket(t)
+  }
 
   const label = first.toLocaleString('en', { month: 'long', year: 'numeric', timeZone: 'UTC' })
   const todayIso = iso(new Date())

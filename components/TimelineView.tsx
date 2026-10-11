@@ -1,5 +1,5 @@
 'use client'
-import { setSearchParams } from '@/lib/url-state'
+import { openTicket } from '@/components/TicketDrawer'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { STATUS_COLOR } from '@/lib/ticket-colors'
 import type { TicketStatus } from '@/lib/status'
@@ -33,7 +33,10 @@ export function TimelineView({ tickets }: { tickets: CalTicket[] }) {
   const pct = (ms: number) => ((ms - min) / span) * 100
   const fmt = (ms: number) => new Date(ms).toLocaleDateString('en', { month: 'short', day: 'numeric', timeZone: 'UTC' })
 
-  const open = (id: string) => setSearchParams({ ticket: id })
+  const open = (id: string) => {
+    const t = tickets.find((x) => x.id === id)
+    if (t) openTicket(t)
+  }
 
   return (
     <div className="space-y-2">

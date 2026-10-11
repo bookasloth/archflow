@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PhotoMarker, type Marker } from '@/components/PhotoMarker'
 import { createSiteIssue, saveAttachment } from '@/app/(app)/media-actions'
+import { compressImage, extOf } from '@/lib/compress-image'
 
 const DISCIPLINE = ['architectural', 'structural', 'electrical', 'plumbing', 'fire_safety',
   'interior', 'landscape', 'construction', 'documentation', 'client_coordination']
@@ -29,11 +30,14 @@ export function SiteCapture({ projects }: { projects: { id: string; name: string
   async function submit() {
     if (!file || !title || !projectId) return
     setBusy(true)
-    const ticketId = await createSiteIssue({ projectId, title, discipline, priority })
-    const ext = file.name.split('.').pop() || 'jpg'
-    const path = `${projectId}/${ticketId}/${crypto.randomUUID()}.${ext}`
+    // Shrink while the issue is being created — both run in parallel.
+    const [ticketId, small] = await Promise.all([
+      createSiteIssue({ projectId, title, discipline, priority }),
+      compressImage(file),
+    ])
+    const path = `${projectId}/${ticketId}/${crypto.randomUUID()}.${extOf(small, 'jpg')}`
     const supabase = createClient()
-    await supabase.storage.from('ticket-media').upload(path, file)
+    await supabase.storage.from('ticket-media').upload(path, small)
     await saveAttachment({ ticketId, projectId, storagePath: path, kind: 'before', markers })
     router.push(`/tickets/${ticketId}`)
   }

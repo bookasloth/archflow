@@ -52,17 +52,20 @@ export function Drawer({
 }
 
 // Shown the instant a drawer opens, so the panel never feels stuck while data loads.
-export function DrawerSkeleton() {
+// withHeader=false when the card's own title/status is already painted above it.
+export function DrawerSkeleton({ withHeader = true }: { withHeader?: boolean }) {
   return (
     <div className="space-y-5" aria-busy="true" aria-label="Loading">
-      <div className="space-y-2">
-        <Skeleton className="h-3 w-20" />
-        <Skeleton className="h-6 w-56" />
-        <div className="flex gap-2">
-          <Skeleton className="h-5 w-24" />
-          <Skeleton className="h-5 w-20" />
+      {withHeader && (
+        <div className="space-y-2">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-6 w-56" />
+          <div className="flex gap-2">
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-5 w-20" />
+          </div>
         </div>
-      </div>
+      )}
       <div className="space-y-2">
         <Skeleton className="h-4 w-24" />
         <div className="divide-y divide-subtle rounded border border-subtle">
