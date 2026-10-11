@@ -42,7 +42,16 @@ const DISCIPLINE_DOT: Record<string, string> = {
   client_coordination: 'bg-discipline-client_coordination',
 }
 
-export function DrawingKanban({ drawings }: { drawings: KanbanDrawing[] }) {
+// mode="revisions": one card per revision of a single drawing (drawing page) — drag only,
+// no drawer to open. Default: one card per drawing (register), click opens the drawer.
+export function DrawingKanban({
+  drawings,
+  mode = 'drawings',
+}: {
+  drawings: KanbanDrawing[]
+  mode?: 'drawings' | 'revisions'
+}) {
+  const open = mode === 'drawings' ? openDrawing : undefined
   const [, startTransition] = useTransition()
   const [optDrawings, applyMove] = useOptimistic(
     drawings,
@@ -73,13 +82,19 @@ export function DrawingKanban({ drawings }: { drawings: KanbanDrawing[] }) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-ink-faint" aria-live="polite">
-        {error ? <span className="text-danger">{error}</span> : 'Drag a card to any column, or open it to change status.'}
+        {error ? (
+          <span className="text-danger">{error}</span>
+        ) : mode === 'drawings' ? (
+          'Drag a card to any column, or open it to change status.'
+        ) : (
+          'Drag a revision to any stage to change its status.'
+        )}
       </p>
       <div ref={kanbanScrollerRef} className="flex gap-3 overflow-x-auto pb-2">
         {noRevision.length > 0 && (
           <Column label="No revision" count={noRevision.length} dotClass="bg-ink-faint" state="idle">
             {noRevision.map((d) => (
-              <Card key={d.id} d={d} draggable={false} onOpen={() => openDrawing(d)} />
+              <Card key={d.id} d={d} draggable={false} onOpen={open && (() => open(d))} />
             ))}
           </Column>
         )}
@@ -118,7 +133,7 @@ export function DrawingKanban({ drawings }: { drawings: KanbanDrawing[] }) {
                     isDragging={dragging?.id === d.id}
                     onDragStart={() => setDragging(d)}
                     onDragEnd={() => setDragging(null)}
-                    onOpen={() => openDrawing(d)}
+                    onOpen={open && (() => open(d))}
                     bind={touchDrag(d, {
                       onStart: setDragging,
                       onEnd: (card, to) => {
@@ -149,7 +164,7 @@ function Card({
   d: KanbanDrawing
   draggable: boolean
   isDragging?: boolean
-  onOpen: () => void
+  onOpen?: () => void // absent = drag-only card (revisions)
   onDragStart?: () => void
   onDragEnd?: () => void
   bind?: React.HTMLAttributes<HTMLDivElement> // touch-drag handlers
@@ -157,7 +172,7 @@ function Card({
   return (
     <div
       {...(draggable ? bind : undefined)}
-      {...prefetchOnHover(() => drawingStore.prefetch(d.id))}
+      {...(onOpen && prefetchOnHover(() => drawingStore.prefetch(d.id)))}
       draggable={draggable}
       onDragStart={(e) => {
         // Without setData, Firefox never starts an HTML5 drag.
@@ -166,15 +181,17 @@ function Card({
         onDragStart?.()
       }}
       onDragEnd={onDragEnd}
-      onClick={() => !clickSuppressed() && onOpen()}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onOpen()
-        }
-      }}
+      {...(onOpen && {
+        onClick: () => !clickSuppressed() && onOpen(),
+        role: 'button',
+        tabIndex: 0,
+        onKeyDown: (e: React.KeyboardEvent) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onOpen()
+          }
+        },
+      })}
       className={`select-none space-y-1 rounded-lg border [-webkit-touch-callout:none] border-subtle bg-surface p-2 text-sm shadow-sm ${
         draggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
       } ${isDragging ? 'opacity-50' : ''} hover:border-line`}

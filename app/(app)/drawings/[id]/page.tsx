@@ -8,7 +8,7 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { Section } from '@/components/ui/Section'
 import { RevisionBadge, DisciplineBadge } from '@/components/ui/Badge'
 import { UploadRevision } from '@/components/UploadRevision'
-import { RevisionHistory } from '@/components/RevisionHistory'
+import { DrawingKanban } from '@/components/DrawingKanban'
 import { RevisionPreview } from '@/components/RevisionPreview'
 import { TicketDrawer } from '@/components/TicketDrawer'
 import type { Discipline } from '@/lib/labels'
@@ -65,13 +65,23 @@ export default async function DrawingPage({ params }: { params: Promise<{ id: st
 
       <UploadRevision drawingId={d.id} projectId={d.project_id} />
 
-      <Section title="Revision history">
-        <RevisionHistory
-          revisions={revisions.map((r) => ({
-            id: r.id, revision_no: r.revision_no, status: r.status,
-            created_at: r.created_at, uploader: r.profiles?.full_name ?? null,
-          }))}
-        />
+      <Section title="Revision stages">
+        {revisions.length === 0 ? (
+          <p className="text-sm text-ink-faint">No revisions yet — upload one above.</p>
+        ) : (
+          <DrawingKanban
+            mode="revisions"
+            drawings={revisions.map((r) => ({
+              id: r.id,
+              drawing_number: formatRevision(r.revision_no),
+              title: `${r.profiles?.full_name ?? 'someone'} · ${r.created_at.slice(0, 10)}`,
+              discipline: null,
+              latestNo: null,
+              latestStatus: r.status,
+              latestRevId: r.id,
+            }))}
+          />
+        )}
       </Section>
 
       {latest && (
