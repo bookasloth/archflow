@@ -10,7 +10,7 @@ import type { RevisionStatus } from '@/lib/revision-status'
 
 type DrawingRow = {
   id: string; drawing_number: string | null; title: string; discipline: string | null
-  drawing_revisions: { id: string; revision_no: number; status: string }[]
+  drawing_revisions: { id: string; revision_no: number; status: string; created_at: string; decided_at: string | null }[]
 }
 
 export default async function DrawingsPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ status?: string; discipline?: string; view?: string }> }) {
@@ -21,7 +21,7 @@ export default async function DrawingsPage({ params, searchParams }: { params: P
     supabase.from('projects').select('name').eq('id', id).single(),
     supabase
       .from('drawings')
-      .select('id, drawing_number, title, discipline, drawing_revisions(id, revision_no, status)')
+      .select('id, drawing_number, title, discipline, drawing_revisions(id, revision_no, status, created_at, decided_at)')
       .eq('project_id', id)
       .order('created_at'),
   ])
@@ -33,6 +33,7 @@ export default async function DrawingsPage({ params, searchParams }: { params: P
       latestNo: latest?.revision_no ?? null,
       latestStatus: (latest?.status ?? null) as RevisionStatus | null,
       latestRevId: latest?.id ?? null,
+      since: latest ? (latest.decided_at ?? latest.created_at) : null,
     }
   })
 

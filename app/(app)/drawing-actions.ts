@@ -152,3 +152,31 @@ export async function getDrawingDetail(id: string) {
 
   return { ...d, revisions, linkedTickets }
 }
+
+// Side-drawer detail for one revision (drawing page's revision board).
+export async function getRevisionDetail(id: string) {
+  const supabase = await createClient()
+  const [{ data: r }, { data: linked }] = await Promise.all([
+    supabase
+      .from('drawing_revisions')
+      .select('id, drawing_id, revision_no, status, storage_path, notes, created_at, decided_at, uploader:uploaded_by(full_name), reviewer:reviewer_id(full_name), drawing:drawing_id(title, drawing_number)')
+      .eq('id', id)
+      .single(),
+    supabase.from('tickets').select('id, seq, type, title, status').eq('drawing_revision_id', id).order('seq', { ascending: false }),
+  ])
+  if (!r) return null
+  type Rel = {
+    uploader: { full_name: string | null } | null
+    reviewer: { full_name: string | null } | null
+    drawing: { title: string; drawing_number: string | null } | null
+  }
+  const rel = r as unknown as Rel
+  return {
+    id: r.id, drawing_id: r.drawing_id, revision_no: r.revision_no, status: r.status as RevisionStatus,
+    path: r.storage_path, url: await signedDrawingUrl(r.storage_path), notes: r.notes,
+    created_at: r.created_at, decided_at: r.decided_at,
+    uploader: rel.uploader?.full_name ?? null, reviewer: rel.reviewer?.full_name ?? null,
+    drawing: rel.drawing,
+    linkedTickets: (linked as { id: string; seq: number; type: string; title: string; status: string }[]) ?? [],
+  }
+}

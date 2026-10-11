@@ -69,3 +69,13 @@ const REVISION_CLS: Record<RevisionStatus, string> = {
 export function RevisionBadge({ status }: { status: RevisionStatus }) {
   return <Badge className={REVISION_CLS[status]}>{revisionLabel(status)}</Badge>
 }
+
+// Time a drawing card has sat in its stage. Amber = a review waiting over a week.
+export function AgeBadge({ label, stale }: { label: string; stale: boolean }) {
+  return (
+    <Badge className={stale ? 'bg-warning-soft text-warning' : 'bg-surface-hover text-ink-muted'}>
+      {stale && <span aria-hidden>⏱</span>}
+      {label}
+    </Badge>
+  )
+}
