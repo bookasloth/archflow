@@ -3,6 +3,13 @@ import type { NextConfig } from 'next'
 const SUPABASE_PROXY_PATH = '/sb' // keep in sync with lib/supabase/proxy.ts
 
 const nextConfig: NextConfig = {
+  // The invoice PDF routes read their font files from disk at runtime.
+  outputFileTracingIncludes: {
+    '/api/invoices/[id]/pdf': ['./lib/invoice/pdf/fonts/**/*'],
+    '/i/[token]': ['./lib/invoice/pdf/fonts/**/*'],
+  },
+  // react-pdf ships its own font/layout engines; keep it out of the server bundle graph.
+  serverExternalPackages: ['@react-pdf/renderer'],
   experimental: {
     // Client-side Router Cache: reuse a page's rendered payload on repeat nav
     // instead of refetching. Dynamic pages default to 0s in Next 15, so hopping

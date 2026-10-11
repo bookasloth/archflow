@@ -25,7 +25,8 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims()
   const user = data?.claims
   const path = request.nextUrl.pathname
-  const isPublic = path.startsWith('/login') || path.startsWith('/auth')
+  // /i/<token> = client invoice link (token-gated in the DB, no login)
+  const isPublic = path.startsWith('/login') || path.startsWith('/auth') || path.startsWith('/i/')
   if (!user && !isPublic) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'

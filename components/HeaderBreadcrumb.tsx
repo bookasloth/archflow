@@ -15,7 +15,9 @@ const TOP: Record<string, string> = {
   tickets: 'Ticket',
   docs: 'Pages',
   admin: 'Admin',
+  invoices: 'Invoices',
 }
+const INVOICE_SUB: Record<string, string> = { clients: 'Clients', projects: 'Projects', settings: 'Settings', new: 'New invoice' }
 const PROJECT_SUB: Record<string, string> = {
   work: 'Work', drawings: 'Drawings', materials: 'Materials', rooms: 'Room', docs: 'Docs',
 }
@@ -36,6 +38,10 @@ export function HeaderBreadcrumb({ projects }: { projects: ProjectRef[] }) {
   } else {
     items.push({ label: TOP[parts[0]] ?? parts[0] })
     if (parts[0] === 'admin' && parts[1]) items.push({ label: parts[1] === 'users' ? 'Users' : parts[1] === 'guide' ? 'Guide' : parts[1] })
+    if (parts[0] === 'invoices' && parts[1]) {
+      items[items.length - 1].href = '/invoices'
+      items.push({ label: INVOICE_SUB[parts[1]] ?? 'Invoice' })
+    }
   }
 
   // Last crumb is the current page — drop its href.
