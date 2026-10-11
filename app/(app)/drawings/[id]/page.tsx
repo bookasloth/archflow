@@ -45,7 +45,7 @@ export default async function DrawingPage({ params }: { params: Promise<{ id: st
   const linkedMaterials = (linkedMat as LM[]) ?? []
 
   return (
-    <div className="max-w-3xl space-y-5">
+    <div className="max-w-6xl space-y-5">
       <PageHeader
         title={
           <span className="flex items-baseline gap-2">
@@ -74,11 +74,12 @@ export default async function DrawingPage({ params }: { params: Promise<{ id: st
             drawings={revisions.map((r) => ({
               id: r.id,
               drawing_number: formatRevision(r.revision_no),
-              title: `${r.profiles?.full_name ?? 'someone'} · ${r.created_at.slice(0, 10)}`,
+              title: `Uploaded ${new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })}`,
               discipline: null,
               latestNo: null,
               latestStatus: r.status,
               latestRevId: r.id,
+              subtitle: r.profiles?.full_name ?? null,
             }))}
           />
         )}
