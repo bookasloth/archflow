@@ -11,11 +11,12 @@ import { UploadRevision } from '@/components/UploadRevision'
 import { DrawingKanban } from '@/components/DrawingKanban'
 import { RevisionPreview } from '@/components/RevisionPreview'
 import { TicketDrawer } from '@/components/TicketDrawer'
+import { RevisionDrawer } from '@/components/RevisionDrawer'
 import type { Discipline } from '@/lib/labels'
 
 type RevRow = {
   id: string; revision_no: number; status: RevisionStatus; storage_path: string
-  created_at: string; profiles: { full_name: string | null } | null
+  notes: string | null; created_at: string; decided_at: string | null; profiles: { full_name: string | null } | null
 }
 
 export default async function DrawingPage({ params }: { params: Promise<{ id: string }> }) {
@@ -26,7 +27,7 @@ export default async function DrawingPage({ params }: { params: Promise<{ id: st
     supabase.from('drawings').select('id, title, drawing_number, discipline, project_id').eq('id', id).single(),
     supabase
       .from('drawing_revisions')
-      .select('id, revision_no, status, storage_path, created_at, profiles:uploaded_by(full_name)')
+      .select('id, revision_no, status, storage_path, notes, created_at, decided_at, profiles:uploaded_by(full_name)')
       .eq('drawing_id', id)
       .order('revision_no', { ascending: false }),
     supabase.from('tickets').select('id, seq, type, title').eq('drawing_id', id).order('seq', { ascending: false }),
@@ -74,12 +75,13 @@ export default async function DrawingPage({ params }: { params: Promise<{ id: st
             drawings={revisions.map((r) => ({
               id: r.id,
               drawing_number: formatRevision(r.revision_no),
-              title: `Uploaded ${new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })}`,
+              title: r.notes || `Uploaded ${new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })}`,
               discipline: null,
               latestNo: null,
               latestStatus: r.status,
               latestRevId: r.id,
               subtitle: r.profiles?.full_name ?? null,
+              since: r.decided_at ?? r.created_at,
             }))}
           />
         )}
@@ -128,6 +130,7 @@ export default async function DrawingPage({ params }: { params: Promise<{ id: st
       </Section>
 
       <TicketDrawer />
+      <RevisionDrawer />
     </div>
   )
 }
