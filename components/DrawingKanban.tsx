@@ -1,11 +1,11 @@
 'use client'
 import { useOptimistic, useState, useTransition } from 'react'
 import { REVISION_ORDER, formatRevision, type RevisionStatus } from '@/lib/revision-status'
-import { revisionLabel, disciplineLabel, type Discipline } from '@/lib/labels'
+import { revisionLabel, type Discipline } from '@/lib/labels'
 import { prefetchOnHover } from '@/lib/detail-store'
 import { clickSuppressed, kanbanScrollerRef, touchDrag } from '@/lib/touch-drag'
 import { openDrawing, drawingStore } from '@/components/DrawingDrawer'
-import { RevisionBadge } from '@/components/ui/Badge'
+import { RevisionBadge, DisciplineBadge } from '@/components/ui/Badge'
 import { KanbanColumn as Column } from '@/components/ui/KanbanColumn'
 import { setRevisionStatus } from '@/app/(app)/drawing-actions'
 
@@ -17,6 +17,7 @@ export type KanbanDrawing = {
   latestNo: number | null
   latestStatus: RevisionStatus | null
   latestRevId: string | null
+  subtitle?: string | null // bottom line, like the assignee on ticket cards
 }
 
 const HEADER_DOT: Record<RevisionStatus, string> = {
@@ -29,18 +30,6 @@ const HEADER_DOT: Record<RevisionStatus, string> = {
   superseded: 'bg-approval-superseded-fg',
 }
 
-const DISCIPLINE_DOT: Record<string, string> = {
-  architectural: 'bg-discipline-architectural',
-  structural: 'bg-discipline-structural',
-  electrical: 'bg-discipline-electrical',
-  plumbing: 'bg-discipline-plumbing',
-  fire_safety: 'bg-discipline-fire_safety',
-  interior: 'bg-discipline-interior',
-  landscape: 'bg-discipline-landscape',
-  construction: 'bg-discipline-construction',
-  documentation: 'bg-discipline-documentation',
-  client_coordination: 'bg-discipline-client_coordination',
-}
 
 // mode="revisions": one card per revision of a single drawing (drawing page) — drag only,
 // no drawer to open. Default: one card per drawing (register), click opens the drawer.
@@ -81,14 +70,13 @@ export function DrawingKanban({
 
   return (
     <div className="space-y-3">
-      <p className="text-xs text-ink-faint" aria-live="polite">
+      {/* Same as the ticket board: only speaks up while dragging or on an error. */}
+      <p className="min-h-4 text-xs" aria-live="polite">
         {error ? (
           <span className="text-danger">{error}</span>
-        ) : mode === 'drawings' ? (
-          'Drag a card to any column, or open it to change status.'
-        ) : (
-          'Drag a revision to any stage to change its status.'
-        )}
+        ) : dragging ? (
+          <span className="text-ink-faint">Drop on any stage</span>
+        ) : null}
       </p>
       <div ref={kanbanScrollerRef} className="flex gap-3 overflow-x-auto pb-2">
         {noRevision.length > 0 && (
@@ -122,7 +110,7 @@ export function DrawingKanban({
             >
               {cards.length === 0 ? (
                 <div className="rounded border border-dashed border-subtle p-3 text-center text-xs text-ink-faint">
-                  No drawings
+                  {mode === 'drawings' ? 'No drawings' : 'No revisions'}
                 </div>
               ) : (
                 cards.map((d) => (
@@ -196,20 +184,19 @@ function Card({
         draggable ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
       } ${isDragging ? 'opacity-50' : ''} hover:border-line`}
     >
-      <div className="flex items-center gap-1.5">
-        {d.drawing_number && <span className="font-mono text-xs text-ink-faint">{d.drawing_number}</span>}
-        <span className="truncate text-ink">{d.title}</span>
-      </div>
-      <div className="flex items-center gap-2 text-xs text-ink-muted">
-        {d.discipline && (
-          <span className="inline-flex items-center gap-1">
-            <span className={`inline-block h-1.5 w-1.5 rounded-full ${DISCIPLINE_DOT[d.discipline] ?? 'bg-ink-faint'}`} />
-            {disciplineLabel(d.discipline as Discipline)}
-          </span>
-        )}
-        {d.latestNo && <span>{formatRevision(d.latestNo)}</span>}
+      {/* Same layout as TicketCard: code + badge, title, meta, person. */}
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-mono text-xs text-ink-muted">{d.drawing_number ?? '—'}</span>
         {d.latestStatus && <RevisionBadge status={d.latestStatus} />}
       </div>
+      <div className="font-medium text-ink">{d.title}</div>
+      {(d.discipline || d.latestNo) && (
+        <div className="flex items-center justify-between text-xs text-ink-muted">
+          {d.discipline ? <DisciplineBadge discipline={d.discipline as Discipline} /> : <span />}
+          {d.latestNo && <span>{formatRevision(d.latestNo)}</span>}
+        </div>
+      )}
+      {d.subtitle && <div className="text-xs text-ink-muted">{d.subtitle}</div>}
     </div>
   )
 }
