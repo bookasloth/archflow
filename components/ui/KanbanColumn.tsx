@@ -5,6 +5,7 @@ export function KanbanColumn({
   count,
   dotClass,
   state,
+  dropStatus,
   onDragOver,
   onDrop,
   children,
@@ -13,12 +14,14 @@ export function KanbanColumn({
   count: number
   dotClass: string
   state: 'idle' | 'target' | 'blocked'
+  dropStatus?: string // touch drag finds the column under the finger by this
   onDragOver?: (e: React.DragEvent) => void
   onDrop?: (e: React.DragEvent) => void
   children: React.ReactNode
 }) {
   return (
     <div
+      data-drop-status={dropStatus}
       onDragOver={onDragOver}
       onDrop={onDrop}
       className={`flex min-h-[8rem] w-64 shrink-0 flex-col gap-2 rounded-lg border p-2 transition-colors ${

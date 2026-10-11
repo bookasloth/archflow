@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PhotoMarker, type Marker } from '@/components/PhotoMarker'
 import { saveAttachment } from '@/app/(app)/media-actions'
+import { compressImage, extOf } from '@/lib/compress-image'
 
 export function AddPhoto({
   ticketId,
@@ -14,7 +15,7 @@ export function AddPhoto({
   ticketId: string
   projectId: string
   kind: 'before' | 'after' | 'reference'
-  onSaved?: () => void
+  onSaved?: () => void | Promise<void>
 }) {
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
@@ -34,9 +35,9 @@ export function AddPhoto({
     if (!file) return
     setBusy(true)
     setError(null)
-    const ext = file.name.split('.').pop() || 'jpg'
-    const path = `${projectId}/${ticketId}/${crypto.randomUUID()}.${ext}`
-    const { error: upErr } = await createClient().storage.from('ticket-media').upload(path, file)
+    const small = await compressImage(file)
+    const path = `${projectId}/${ticketId}/${crypto.randomUUID()}.${extOf(small, 'jpg')}`
+    const { error: upErr } = await createClient().storage.from('ticket-media').upload(path, small)
     if (upErr) {
       setError(`Upload failed: ${upErr.message}`)
       setBusy(false)
@@ -46,9 +47,9 @@ export function AddPhoto({
     setFile(null)
     setPreview('')
     setMarkers([])
-    setBusy(false)
     router.refresh()
-    onSaved?.()
+    await onSaved?.()
+    setBusy(false)
   }
 
   return (

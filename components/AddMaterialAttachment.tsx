@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { addMaterialAttachment } from '@/app/(app)/material-actions'
+import { compressImage, extOf } from '@/lib/compress-image'
 
 export function AddMaterialAttachment({ materialId, projectId }: { materialId: string; projectId: string }) {
   const router = useRouter()
@@ -16,9 +17,10 @@ export function AddMaterialAttachment({ materialId, projectId }: { materialId: s
     setBusy(true)
     setError(null)
     try {
-      const ext = file.name.split('.').pop() || 'bin'
-      const path = `${projectId}/${materialId}/${crypto.randomUUID()}.${ext}`
-      const { error: upErr } = await createClient().storage.from('material-files').upload(path, file)
+      // Photos get shrunk; datasheets (PDFs) upload as-is.
+      const upload = kind === 'photo' ? await compressImage(file) : file
+      const path = `${projectId}/${materialId}/${crypto.randomUUID()}.${extOf(upload, 'bin')}`
+      const { error: upErr } = await createClient().storage.from('material-files').upload(path, upload)
       if (upErr) {
         setError(upErr.message)
         return

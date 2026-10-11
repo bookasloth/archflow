@@ -151,6 +151,7 @@ export async function getTicketDetail(id: string) {
   const photos = await Promise.all(
     ((atts as unknown as AttRow[]) ?? []).map(async (a) => ({
       url: await signedUrl(a.storage_path),
+      path: a.storage_path,
       markers: a.issue_markers ?? [],
       kind: a.kind,
     })),

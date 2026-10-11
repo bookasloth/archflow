@@ -1,4 +1,5 @@
 'use client'
+import { clickSuppressed } from '@/lib/touch-drag'
 import type { TicketStatus } from '@/lib/status'
 import { PriorityBadge, DisciplineBadge } from '@/components/ui/Badge'
 import type { Priority } from '@/lib/health'
@@ -22,15 +23,18 @@ export function TicketCard({
   onOpen,
   onDragStart,
   onDragEnd,
+  bind,
 }: {
   ticket: CardTicket
   isDragging?: boolean
+  bind?: React.HTMLAttributes<HTMLDivElement> // touch-drag + hover-prefetch handlers
   onOpen: (id: string) => void
   onDragStart: (t: CardTicket) => void
   onDragEnd: () => void
 }) {
   return (
     <div
+      {...bind}
       draggable
       onDragStart={(e) => {
         e.dataTransfer.setData('text/plain', ticket.id)
@@ -38,7 +42,7 @@ export function TicketCard({
         onDragStart(ticket)
       }}
       onDragEnd={onDragEnd}
-      onClick={() => onOpen(ticket.id)}
+      onClick={() => !clickSuppressed() && onOpen(ticket.id)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
@@ -47,7 +51,7 @@ export function TicketCard({
       }}
       role="button"
       tabIndex={0}
-      className={`cursor-grab space-y-1 rounded-lg border border-subtle bg-surface p-2 text-sm shadow-sm hover:border-line active:cursor-grabbing ${isDragging ? 'opacity-50' : ''}`}
+      className={`cursor-grab select-none space-y-1 rounded-lg [-webkit-touch-callout:none] border border-subtle bg-surface p-2 text-sm shadow-sm hover:border-line active:cursor-grabbing ${isDragging ? 'opacity-50' : ''}`}
     >
       <div className="flex items-center justify-between">
         <span className="font-mono text-xs text-ink-muted">

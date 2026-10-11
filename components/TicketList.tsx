@@ -1,7 +1,8 @@
 'use client'
-import { useTransition } from 'react'
+import { useOptimistic, useState, useTransition } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { setSearchParams } from '@/lib/url-state'
+import { prefetchOnHover } from '@/lib/detail-store'
+import { openTicket, ticketStore } from '@/components/TicketDrawer'
 import { StatusBadge, PriorityBadge, DisciplineBadge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { applySort, groupBy, type SortSpec } from '@/lib/view'
@@ -31,6 +32,11 @@ const GROUP_LABEL: Record<string, (v: string) => string> = {
 export function TicketList({ tickets }: { tickets: Row[] }) {
   const params = useSearchParams()
   const [, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+  // Status picks apply instantly; a refused move (e.g. verify without photo) snaps back.
+  const [rows, setRowStatus] = useOptimistic(tickets, (state: Row[], m: { id: string; to: string }) =>
+    state.map((t) => (t.id === m.id ? { ...t, status: m.to } : t)),
+  )
 
   const [sortField, sortDir] = (params.get('sort') ?? '').split(':')
   const sort: SortSpec | null = sortField ? { field: sortField, dir: sortDir === 'desc' ? 'desc' : 'asc' } : null
@@ -38,16 +44,18 @@ export function TicketList({ tickets }: { tickets: Row[] }) {
   const hidden = new Set((params.get('hide') ?? '').split(',').filter(Boolean))
   const show = (k: string) => !hidden.has(k)
 
-  const sorted = applySort(tickets as unknown as Record<string, unknown>[], sort) as unknown as Row[]
+  const sorted = applySort(rows as unknown as Record<string, unknown>[], sort) as unknown as Row[]
 
-  const open = (id: string) => setSearchParams({ ticket: id })
   function setStatus(t: Row, to: string) {
     if (to === t.status) return
+    setError(null)
     startTransition(async () => {
+      setRowStatus({ id: t.id, to })
       const fd = new FormData()
       fd.set('ticket_id', t.id); fd.set('to', to)
       // changeStatus revalidates the project, so fresh rows arrive with the response.
-      await changeStatus(fd)
+      const res = await changeStatus(fd).catch(() => ({ ok: false, error: 'Could not change status — check your connection' }))
+      if (!res.ok) setError(res.error ?? 'Could not change status')
     })
   }
 
@@ -60,6 +68,7 @@ export function TicketList({ tickets }: { tickets: Row[] }) {
 
   return (
     <div className="space-y-4">
+      {error && <p className="text-xs text-danger" aria-live="polite">{error}</p>}
       {groups.map((g) => (
         <div key={g.key}>
           {group && (
@@ -87,7 +96,7 @@ export function TicketList({ tickets }: { tickets: Row[] }) {
                   return (
                     <tr key={t.id} className="hover:bg-surface-hover">
                       <td className="px-3 py-2">
-                        <button onClick={() => open(t.id)}
+                        <button onClick={() => openTicket(t)} {...prefetchOnHover(() => ticketStore.prefetch(t.id))}
                           className="flex min-w-0 items-center gap-2 rounded text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--focus)]">
                           <span className="font-mono text-xs text-ink-faint">{(t.type === 'site_issue' ? 'SITE-' : 'TASK-') + t.seq}</span>
                           <span className="truncate text-ink">{t.title}</span>

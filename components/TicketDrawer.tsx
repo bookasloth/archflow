@@ -1,10 +1,12 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { getTicketDetail } from '@/app/(app)/actions'
+import type { getTicketDetail } from '@/app/(app)/actions'
 import { setSearchParams } from '@/lib/url-state'
+import { detailStore, stableUrl } from '@/lib/detail-store'
 import { Drawer, DrawerSkeleton } from '@/components/ui/Drawer'
+import { StatusBadge } from '@/components/ui/Badge'
 import { StatusControl } from '@/components/StatusControl'
 import { BeforeAfter } from '@/components/BeforeAfter'
 import { AddPhoto } from '@/components/AddPhoto'
@@ -13,43 +15,57 @@ import { TicketExtras } from '@/components/TicketExtras'
 import type { TicketType, TicketStatus } from '@/lib/status'
 import type { Marker } from '@/components/PhotoMarker'
 
-type Detail = Awaited<ReturnType<typeof getTicketDetail>>
+type Detail = NonNullable<Awaited<ReturnType<typeof getTicketDetail>>>
 
-// Last-seen details: reopening a ticket paints instantly, then refreshes in the background.
-// ponytail: unbounded per-tab Map — fine for a session's worth of tickets.
-const cache = new Map<string, NonNullable<Detail>>()
+export const ticketStore = detailStore<Detail>((id) => `/api/tickets/${id}`)
+
+// What a card/row already knows. The drawer paints it instantly while the rest loads.
+export type TicketSeed = { id: string; seq: number; type: string; title: string; status?: string }
+const seeds = new Map<string, TicketSeed>()
+export function openTicket(seed: TicketSeed) {
+  seeds.set(seed.id, seed)
+  setSearchParams({ ticket: seed.id })
+}
+
+const code = (t: { type: string; seq: number }) => (t.type === 'site_issue' ? 'SITE-' : 'TASK-') + t.seq
 
 export function TicketDrawer() {
   const id = useSearchParams().get('ticket')
-  const [detail, setDetail] = useState<Detail>(null)
+  const [detail, setDetail] = useState<Detail | null>(null)
   const [loading, setLoading] = useState(false)
-  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     if (!id) return
     let alive = true
-    setDetail(cache.get(id) ?? null)
+    const cached = ticketStore.cached(id)
+    setDetail(cached ?? null)
     setLoading(true)
-    getTicketDetail(id)
-      .then((d) => {
-        if (!alive) return
-        if (d) cache.set(id, d)
-        setDetail(d)
-      })
+    // No cache: reuse a hover prefetch already in flight. Cached: show it, refresh behind it.
+    ticketStore
+      .load(id, !!cached)
+      .then((d) => alive && setDetail(d))
       .catch(() => {})
       .finally(() => alive && setLoading(false))
     return () => {
       alive = false
     }
-  }, [id, reloadKey])
+  }, [id])
+
+  // Awaited by status/comment/photo/tag changes so optimistic UI hands off without a flicker.
+  const refresh = useCallback(async () => {
+    if (!id) return
+    const d = await ticketStore.load(id, true).catch(() => null)
+    if (d) setDetail(d)
+  }, [id])
 
   if (!id) return null
   // Never flash the previous ticket while the next one loads.
   const shown = detail?.id === id ? detail : null
-  const reload = () => setReloadKey((k) => k + 1)
+  const seed = seeds.get(id)
 
-  const before = shown?.photos.filter((p) => p.kind === 'before') ?? []
-  const after = shown?.photos.filter((p) => p.kind === 'after') ?? []
+  const photos = (shown?.photos ?? []).map((p) => ({ ...p, url: stableUrl(p.path, p.url) }))
+  const before = photos.filter((p) => p.kind === 'before')
+  const after = photos.filter((p) => p.kind === 'after')
   const isSite = shown?.type === 'site_issue'
   const needsAfterToVerify = isSite && shown?.status === 'resolved' && after.length === 0
   const rel = shown as unknown as {
@@ -64,13 +80,23 @@ export function TicketDrawer() {
 
   return (
     <Drawer label="Ticket detail" onClose={() => setSearchParams({ ticket: null })}>
-      {!shown && (loading ? <DrawerSkeleton /> : <p className="text-sm text-ink-muted">Couldn&apos;t load this ticket.</p>)}
+      {!shown && seed && (
+        <div className="mb-5">
+          <div className="font-mono text-xs text-ink-muted">{code(seed)}</div>
+          <h2 className="text-lg font-semibold">{seed.title}</h2>
+          {seed.status && <div className="mt-1"><StatusBadge status={seed.status as TicketStatus} /></div>}
+        </div>
+      )}
+      {!shown &&
+        (loading ? (
+          <DrawerSkeleton withHeader={!seed} />
+        ) : (
+          <p className="text-sm text-ink-muted">Couldn&apos;t load this ticket.</p>
+        ))}
       {shown && (
         <div className="space-y-5">
           <div>
-            <div className="font-mono text-xs text-ink-muted">
-              {(shown.type === 'site_issue' ? 'SITE-' : 'TASK-') + shown.seq}
-            </div>
+            <div className="font-mono text-xs text-ink-muted">{code(shown)}</div>
             <h2 className="text-lg font-semibold">{shown.title}</h2>
             <div className="mt-1 flex gap-3 text-xs text-ink-muted">
               <span>{shown.discipline}</span>
@@ -99,14 +125,14 @@ export function TicketDrawer() {
                   Add an after-photo to verify this issue.
                 </p>
               )}
-              <AddPhoto ticketId={shown.id} projectId={shown.project_id} kind="after" onSaved={reload} />
+              <AddPhoto ticketId={shown.id} projectId={shown.project_id} kind="after" onSaved={refresh} />
             </div>
           )}
           <StatusControl
             id={shown.id}
             type={shown.type as TicketType}
             status={shown.status as TicketStatus}
-            onChanged={reload}
+            onChanged={refresh}
           />
           {shown.description && <p className="text-sm">{shown.description}</p>}
           <TicketExtras
@@ -118,15 +144,19 @@ export function TicketDrawer() {
             tags={rel.tags}
             allTags={rel.allTags}
             subtasks={rel.subtasks}
-            onChanged={reload}
-            onOpenTicket={(tid) => setSearchParams({ ticket: tid })}
+            onChanged={refresh}
+            onOpenTicket={(tid) => {
+              const s = rel.subtasks.find((x) => x.id === tid)
+              if (s) openTicket(s)
+              else setSearchParams({ ticket: tid })
+            }}
           />
           {!isSite &&
-            shown.photos.map((p, i) => (
+            photos.map((p, i) => (
               // eslint-disable-next-line @next/next/no-img-element
-              <img key={i} src={p.url} alt="" className="max-w-full rounded" />
+              <img key={i} src={p.url} alt="" loading="lazy" className="max-w-full rounded" />
             ))}
-          <CommentThread ticketId={shown.id} comments={shown.comments} onPosted={reload} />
+          <CommentThread ticketId={shown.id} comments={shown.comments} onPosted={refresh} />
         </div>
       )}
     </Drawer>
